@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920, initial-scale=1">
+<title>Borealis: board</title>
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/board.css">
+</head>
+<body class="board">
+<header id="top" class="topbar"></header>
+<main class="stage">
+  <section class="mapwrap">
+    <div id="map" class="map"></div>
+    <div id="strip" class="strip"></div>
+  </section>
+  <aside id="panel" class="panel" aria-live="polite"></aside>
+</main>
+<div class="ticker"><span class="kicker">News</span><span id="ticker-text"></span></div>
+<footer class="controls">
+  <button id="btn-back" class="btn ctl">Back</button>
+  <button id="btn-pause" class="btn ctl">Pause: eyes up</button>
+  <button id="btn-timer" class="btn ctl">Set timer</button>
+  <button id="btn-plus" class="btn ctl sm" aria-label="Add one minute">+1 min</button>
+  <div id="now" class="now"></div>
+  <button id="btn-teacher" class="btn ctl">Teacher</button>
+  <button id="btn-next" class="btn primary ctl next">Next step</button>
+</footer>
+<div id="pause" class="pause" hidden><b>Eyes up</b><span>The game is paused. Tap to resume.</span></div>
+<script type="module" src="js/board.js"></script>
+</body>
+</html>

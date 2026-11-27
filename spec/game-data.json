@@ -1,0 +1,1111 @@
+{
+  "_schema": {
+    "about": "All game data for Borealis. Formulas live in spec/game-systems.md section 13 and are implemented in spec/balance/engine.py (reference engine). Numbers here are game-scale, not real-world values. Money is in $B (billions of Borealis dollars). Goods are in units.",
+    "version": "1.0 (2026-11-27)",
+    "conventions": {
+      "ids": "lower case, no spaces. Province ids are locked by the brief.",
+      "levels": "Tax and spending use levels 1 to 5. Level 3 is Standard. Arrays indexed by level use index 0 for level 1.",
+      "groups": "Citizen group ids: workers, families, businesses, seniors.",
+      "resources": "Resource ids: food, energy, materials, money. Only food, energy and materials are goods. Money is the treasury.",
+      "studentText": "Any field named text, label, hint or headline is student-facing. Grade 8 reading level, second person, no em dashes."
+    },
+    "constants": "Formula constants. See game-systems.md section 13 for where each one is used.",
+    "resources": "The four whiteboard resources.",
+    "citizenGroups": "The four groups that make up approval. taxWeight scales how much a tax change moves the group.",
+    "spendingCategories": "Four provincial spending lines. groupWeight scales the level effect for each group.",
+    "economicSystems": "Five steps from market (1) to command (5). prodMult: goods production multiplier. baseUnemployment: percent. growth: yearly service growth in percent points. shockMult: scales national event production hits. plannerShift: goods units the group may move by hand each year. marketShift: units the market moves on its own toward the highest price. scarcityShare: who feels a shortage most. approvalPerYear: yearly approval change for each group from the system alone.",
+    "provinces": "Starting state. production and needs are goods units per year. services is yearly money output of the service economy in $B. spendingBaseline is the cost of each line at Standard (level 3) when CPI is 100. costFactor raises all spending costs (Northreach is remote). debt is net debt in $B (negative means savings). groupShare sums to 1.",
+    "investmentProjects": "Optional one-off projects from Year 4. Cost is a percent of this year's revenue (the app shows it in $B). Usually paid by borrowing. Effects are permanent.",
+    "effects": {
+      "shape": "{ type, ...params, target?, start?, years?, ifSpending? }",
+      "type": {
+        "money": "amount ($B) or pctRevenue (percent of this year's revenue). Negative is a cost. Paid at year end. years repeats it.",
+        "approval": "group (workers, families, businesses, seniors or all) and amount (points).",
+        "production": "resource and pct. Multiplies goods production for the year(s).",
+        "baseProduction": "resource and amount (units). Permanent change from next year.",
+        "services": "pct. Multiplies service output.",
+        "need": "resource and amount (units) or pct. Changes yearly needs.",
+        "unemployment": "amount (percent points).",
+        "growth": "amount (percent points) added to this year's growth.",
+        "inflation": "amount (percent points) added to this year's inflation.",
+        "price": "resource and mult. National price multiplier for this year. Events only.",
+        "cost": "category (health, education, infrastructure, social or all) and pct. Changes spending cost.",
+        "skill": "amount. Adds to the province skill level (education stock).",
+        "infrastructure": "amount. Adds to the province infrastructure stock.",
+        "interestRate": "amount (percent points) added to the debt interest rate.",
+        "tradeFee": "pct added to the interprovincial trade fee. Optional routes list limits it to some routes."
+      },
+      "target": "self (default), all, others, a province id, or a list of province ids.",
+      "start": "now (default) or next. Card choices are made after Income, so production and services effects from choices always start next year.",
+      "years": "How many years the effect lasts (default 1).",
+      "ifSpending": "{ category, atLeast, scale }. If the province set that line at or above the level this year, multiply the effect by scale."
+    },
+    "cards": "localIssues: province cards (province set) and general cards (province null). nationalEvents: auto effects hit listed provinces when revealed; every province then picks one choice. bridgeCrisis: the period 9 card.",
+    "deck": "Default order of cards by year. The teacher can swap any card before revealing it.",
+    "parties": "Four preset federal parties. spectrum uses the same 1 to 5 scale as economicSystems. planks feed the election model (appeal) and the federal budget (budgetLevers).",
+    "regionalPromises": "Pool of one promise per province. Each party may adopt one.",
+    "ridingTypes": "Citizen group mix by riding type. Sums to 1.",
+    "ridings": "34 ridings. Seats per province follow population.",
+    "election": "Constants for the election model. See game-systems.md section 9.",
+    "federalBudget": "Lever options for the federal budget bill and their effects on provinces in Year 7.",
+    "bills": "Bills for Phase 2. The budget bill is required.",
+    "scoring": "Reasoning points, awards and the class goal.",
+    "periods": "Default 16-period flow with step timings in minutes."
+  },
+
+  "meta": {
+    "nation": "Borealis",
+    "capital": "Corvell (Capital District)",
+    "currency": "$B",
+    "fiscalYears": 6,
+    "maxReasoningPointsPerYear": 3
+  },
+
+  "constants": {
+    "taxRates": [20, 25, 30, 35, 40],
+    "spendingLevelMult": [0.6, 0.8, 1.0, 1.2, 1.4],
+    "spendingLevelEffect": [-2.5, -1.2, 0, 0.8, 0.9],
+    "taxLevelEffect": [1.2, 0.8, 0, -1.2, -2.5],
+    "levelNames": ["Deep cut", "Cut", "Standard", "Boost", "Big boost"],
+    "basePrice": 1.0,
+    "priceMin": 0.5,
+    "priceMax": 2.0,
+    "worldBuyMult": 1.3,
+    "worldSellMult": 0.8,
+    "tradeFee": 0.10,
+    "fairPriceBand": [0.5, 2.0],
+    "maxOpenOffers": 3,
+    "maxCounters": 2,
+    "aidCapPerYear": 5,
+    "shiftConversion": 0.75,
+    "shiftCapPct": 40,
+    "infraMaterialsPctPerLevel": 15,
+    "infraStockProdBonus": 0.02,
+    "infraStockMin": -6,
+    "infraStockMax": 8,
+    "skillMin": -6,
+    "skillMax": 10,
+    "skillGrowth": 0.3,
+    "infraLevelGrowth": 0.5,
+    "taxLevelGrowth": -0.5,
+    "energyShortProdLoss": 0.5,
+    "materialsShortProdLoss": 0.3,
+    "unemploymentServicesLoss": 0.02,
+    "unemploymentNeutral": 5,
+    "unemploymentMin": 2,
+    "unemploymentMax": 20,
+    "unemploymentFromEnergyShort": 10,
+    "unemploymentFromMaterialsShort": 5,
+    "unemploymentFromInfraLevel": -0.5,
+    "unemploymentFromTaxLevel": 0.5,
+    "unemploymentFromSkill": -0.25,
+    "socialCostBase": 0.5,
+    "socialCostPerUnemployment": 0.1,
+    "baseInflation": 2,
+    "inflationFromFoodPrice": 10,
+    "inflationFromEnergyPrice": 8,
+    "inflationFromFoodUnmet": 20,
+    "inflationFromEnergyUnmet": 15,
+    "inflationPerDeficitPctRevenue": 0.1,
+    "inflationFromDeficitMax": 4,
+    "inflationMin": -1,
+    "inflationMax": 15,
+    "interestRate": 6,
+    "highDebtInterestRate": 9,
+    "highDebtRatio": 0.8,
+    "creditLimitRatio": 0.9,
+    "savingsRate": 2,
+    "scarcityApproval": { "food": 20, "energy": 15, "materials": 5 },
+    "unemploymentApproval": {
+      "pain": { "workers": -1, "families": -0.5, "businesses": -0.3, "seniors": 0 },
+      "painAbove": 7,
+      "gain": { "workers": 0.5, "families": 0.25, "businesses": 0, "seniors": 0 },
+      "gainBelow": 5
+    },
+    "inflationApproval": {
+      "above": 3,
+      "perPoint": { "workers": -0.5, "families": -0.7, "businesses": -0.3, "seniors": -1 }
+    },
+    "debtApproval": {
+      "above": 0.4,
+      "perRatio": { "workers": -2, "families": -3, "businesses": -8, "seniors": -5 },
+      "downgradeAll": -2,
+      "interestShareAbove": 10,
+      "perInterestPoint": { "workers": -0.1, "families": -0.1, "businesses": -0.2, "seniors": -0.15 }
+    },
+    "creditLimitInterestShare": 15,
+    "deficitApproval": {
+      "abovePctRevenue": 10,
+      "perPct": { "workers": -0.03, "families": -0.04, "businesses": -0.1, "seniors": -0.06 },
+      "maxPerGroup": -5
+    },
+    "systemChangeApproval": -1,
+    "cutPenalty": -0.7,
+    "taxHikePenalty": -0.7,
+    "maxSystemStepsPerYear": 1,
+    "approvalDrift": 0.15,
+    "approvalCenter": 50,
+    "approvalMin": 5,
+    "approvalMax": 95,
+    "reasoningApprovalPerPoint": 0.5,
+    "underdogExtraDraw": true,
+    "marketShiftPriceGap": 0.2,
+    "roundTo": { "goods": 0, "money": 0, "percent": 1, "approval": 0 }
+  },
+
+  "resources": [
+    { "id": "energy", "name": "Energy", "kind": "good", "icon": "bolt", "text": "Power for homes and factories. Without enough energy, factories slow down and people lose jobs." },
+    { "id": "food", "name": "Food", "kind": "good", "icon": "wheat", "text": "Everyone needs to eat. When food is short, prices rise and people get angry fast." },
+    { "id": "materials", "name": "Materials", "kind": "good", "icon": "crate", "text": "Wood, metal and minerals. You need them to build roads, homes and schools." },
+    { "id": "money", "name": "Money", "kind": "treasury", "icon": "coin", "text": "Your government's treasury. It comes from taxes and from selling goods." }
+  ],
+
+  "citizenGroups": [
+    { "id": "workers", "name": "Workers", "taxWeight": 1.0, "text": "People with jobs in factories, mines, farms, shops and offices. They want good jobs and fair pay." },
+    { "id": "families", "name": "Families", "taxWeight": 0.7, "text": "Parents and kids. They want good schools, health care and prices they can afford." },
+    { "id": "businesses", "name": "Businesses", "taxWeight": 1.5, "text": "Business owners, from corner stores to big companies. They want low taxes, roads that work and room to grow." },
+    { "id": "seniors", "name": "Seniors", "taxWeight": 0.7, "text": "Retired people. They want health care, steady prices and a government that does not take big risks." }
+  ],
+
+  "spendingCategories": [
+    { "id": "health", "name": "Healthcare", "text": "Hospitals, doctors, nurses.", "groupWeight": { "workers": 0.5, "families": 1.0, "businesses": 0, "seniors": 1.5 }, "otherEffects": "Softens flu and health events (ifSpending)." },
+    { "id": "education", "name": "Education", "text": "Schools, colleges, training.", "groupWeight": { "workers": 0.5, "families": 1.5, "businesses": 0.5, "seniors": 0 }, "otherEffects": "Skill changes by (level - 3) each year. Skill adds to growth and lowers unemployment. Pays off slowly." },
+    { "id": "infrastructure", "name": "Infrastructure", "text": "Roads, bridges, power lines, ports.", "groupWeight": { "workers": 1.0, "families": 0.5, "businesses": 1.5, "seniors": 0 }, "otherEffects": "Infrastructure stock changes by (level - 3) each year and raises goods production. Each level above Standard raises the Materials need by 15% (at least 1 unit). Adds growth and jobs this year." },
+    { "id": "social", "name": "Social programs", "text": "Help for people without work, seniors' pensions, child benefits.", "groupWeight": { "workers": 1.0, "families": 1.0, "businesses": 0, "seniors": 1.0 }, "otherEffects": "Cost rises when unemployment rises." }
+  ],
+
+  "economicSystems": [
+    {
+      "step": 1, "id": "market", "name": "Market",
+      "text": "People and businesses decide. Prices tell farms and factories what to make. Government stays small.",
+      "threeQuestions": { "what": "Prices decide. The market moves production toward goods that sell for more.", "how": "Private businesses compete to make things cheaply.", "forWhom": "People who can pay. Shortages hurt workers, families and seniors more." },
+      "prodMult": 1.08, "baseUnemployment": 6.5, "growth": 3.5, "shockMult": 1.2,
+      "plannerShift": 0, "marketShift": 3,
+      "scarcityShare": { "workers": 1.3, "families": 1.3, "businesses": 0.5, "seniors": 1.3 },
+      "approvalPerYear": { "workers": -2, "families": 0, "businesses": 4, "seniors": -1 }
+    },
+    {
+      "step": 2, "id": "market-mixed", "name": "Market-leaning mixed",
+      "text": "Mostly private business with some government rules and services.",
+      "threeQuestions": { "what": "Mostly prices, with a little government planning.", "how": "Mostly private businesses, some public services.", "forWhom": "Mostly people who can pay, with a basic safety net." },
+      "prodMult": 1.04, "baseUnemployment": 5.5, "growth": 2.75, "shockMult": 1.1,
+      "plannerShift": 1, "marketShift": 2,
+      "scarcityShare": { "workers": 1.15, "families": 1.15, "businesses": 0.75, "seniors": 1.15 },
+      "approvalPerYear": { "workers": -1, "families": 0, "businesses": 2, "seniors": 0 }
+    },
+    {
+      "step": 3, "id": "mixed", "name": "Mixed",
+      "text": "Private businesses run most things. Government runs health care and schools and sets rules.",
+      "threeQuestions": { "what": "Prices and government plans share the job.", "how": "Private businesses and public services side by side.", "forWhom": "Everyone gets basic services. Extras go to those who can pay." },
+      "prodMult": 1.0, "baseUnemployment": 5, "growth": 2, "shockMult": 1.0,
+      "plannerShift": 2, "marketShift": 1,
+      "scarcityShare": { "workers": 1.0, "families": 1.0, "businesses": 1.0, "seniors": 1.0 },
+      "approvalPerYear": { "workers": 0, "families": 0, "businesses": 0, "seniors": 1 }
+    },
+    {
+      "step": 4, "id": "command-mixed", "name": "Command-leaning mixed",
+      "text": "Government owns key industries and plans a lot. Some private business is allowed.",
+      "threeQuestions": { "what": "Mostly the government plan.", "how": "Many public companies, some private ones.", "forWhom": "Shared more equally. Fewer choices for buyers." },
+      "prodMult": 0.97, "baseUnemployment": 4, "growth": 1.25, "shockMult": 0.9,
+      "plannerShift": 3, "marketShift": 0,
+      "scarcityShare": { "workers": 0.9, "families": 0.9, "businesses": 0.9, "seniors": 0.9 },
+      "approvalPerYear": { "workers": 1, "families": 0, "businesses": -2, "seniors": 0 }
+    },
+    {
+      "step": 5, "id": "command", "name": "Command",
+      "text": "Government decides what to make, how to make it and who gets it. It owns the farms and factories.",
+      "threeQuestions": { "what": "The government plan decides.", "how": "Government-owned farms and factories.", "forWhom": "Shared equally by plan. Little personal choice." },
+      "prodMult": 0.94, "baseUnemployment": 3.5, "growth": 0.5, "shockMult": 0.8,
+      "plannerShift": 4, "marketShift": 0,
+      "scarcityShare": { "workers": 0.8, "families": 0.8, "businesses": 0.8, "seniors": 0.8 },
+      "approvalPerYear": { "workers": 2, "families": 0, "businesses": -4, "seniors": 1 }
+    }
+  ],
+
+  "traditionalEconomy": {
+    "inSpectrum": false,
+    "where": "Local issue card saltmarch-fishing-custom, choice keep-custom.",
+    "why": "Traditional economies decide by custom and habit, not prices or plans. A province government cannot switch a whole modern economy to tradition, so it does not fit as a setting. A fishing village that shares grounds by custom is a real, neutral historical example in Atlantic regions and lets students compare all three ways of deciding on one card."
+  },
+
+  "provinces": [
+    {
+      "id": "westhaven", "name": "Westhaven", "modelledOn": "Pacific coast",
+      "blurb": "Mountains, rainforest and the busiest port in Borealis. You have timber and hydro power, but little farmland.",
+      "population": 5,
+      "production": { "food": 7, "energy": 13, "materials": 9 },
+      "needs": { "food": 10, "energy": 10, "materials": 8 },
+      "services": 22,
+      "spendingBaseline": {"health": 4.5, "education": 3.5, "infrastructure": 2.5, "social": 3.0},
+      "costFactor": 1.0,
+      "debt": 10,
+      "startSystem": 3,
+      "groupShare": { "workers": 0.30, "families": 0.30, "businesses": 0.20, "seniors": 0.20 },
+      "startApproval": { "workers": 50, "families": 52, "businesses": 54, "seniors": 50 },
+      "strongIn": ["materials", "energy"], "shortOn": ["food"]
+    },
+    {
+      "id": "ridgeland", "name": "Ridgeland", "modelledOn": "Foothills and plains",
+      "blurb": "Oil, gas and cattle country. When energy prices are high you boom. When they fall, you feel it first.",
+      "population": 4,
+      "production": { "food": 12, "energy": 22, "materials": 4 },
+      "needs": { "food": 9, "energy": 11, "materials": 8 },
+      "services": 16,
+      "spendingBaseline": {"health": 6.5, "education": 5.5, "infrastructure": 4.0, "social": 4.5},
+      "costFactor": 1.0,
+      "debt": -15,
+      "startSystem": 3,
+      "groupShare": { "workers": 0.35, "families": 0.30, "businesses": 0.25, "seniors": 0.10 },
+      "startApproval": { "workers": 52, "families": 50, "businesses": 56, "seniors": 50 },
+      "strongIn": ["energy", "money"], "shortOn": ["materials"]
+    },
+    {
+      "id": "goldplain", "name": "Goldplain", "modelledOn": "Prairies",
+      "blurb": "Wheat, canola and potash. You feed the country, but your small towns have little money and you buy most of your energy.",
+      "population": 3,
+      "production": { "food": 19, "energy": 4, "materials": 8 },
+      "needs": { "food": 8, "energy": 10, "materials": 6 },
+      "services": 8,
+      "spendingBaseline": {"health": 4.5, "education": 3.5, "infrastructure": 3.0, "social": 3.0},
+      "costFactor": 1.0,
+      "debt": 8,
+      "startSystem": 3,
+      "groupShare": { "workers": 0.25, "families": 0.30, "businesses": 0.25, "seniors": 0.20 },
+      "startApproval": { "workers": 50, "families": 50, "businesses": 50, "seniors": 52 },
+      "strongIn": ["food", "materials"], "shortOn": ["money", "energy"]
+    },
+    {
+      "id": "lakemoor", "name": "Lakemoor", "modelledOn": "Great Lakes heartland",
+      "blurb": "Factories, banks and the biggest cities. You have the most people and the most money, but you must buy food and energy.",
+      "population": 12,
+      "production": { "food": 10, "energy": 10, "materials": 11 },
+      "needs": { "food": 15, "energy": 15, "materials": 14 },
+      "services": 100,
+      "spendingBaseline": {"health": 7.5, "education": 6.0, "infrastructure": 4.5, "social": 5.0},
+      "costFactor": 1.0,
+      "debt": 30,
+      "startSystem": 3,
+      "groupShare": { "workers": 0.35, "families": 0.30, "businesses": 0.20, "seniors": 0.15 },
+      "startApproval": { "workers": 48, "families": 50, "businesses": 55, "seniors": 50 },
+      "strongIn": ["money"], "shortOn": ["energy", "food"]
+    },
+    {
+      "id": "valcourt", "name": "Valcourt", "modelledOn": "St. Lawrence river valley",
+      "blurb": "Big rivers, hydro dams and aluminum plants. You have your own language and culture. Hard years can leave you short of food.",
+      "population": 7,
+      "production": { "food": 11, "energy": 18, "materials": 9 },
+      "needs": { "food": 12, "energy": 12, "materials": 8 },
+      "services": 26,
+      "spendingBaseline": {"health": 7.0, "education": 5.5, "infrastructure": 4.5, "social": 5.0},
+      "costFactor": 1.0,
+      "debt": 25,
+      "startSystem": 3,
+      "groupShare": { "workers": 0.30, "families": 0.30, "businesses": 0.20, "seniors": 0.20 },
+      "startApproval": { "workers": 50, "families": 52, "businesses": 50, "seniors": 52 },
+      "strongIn": ["energy", "materials"], "shortOn": ["food"]
+    },
+    {
+      "id": "saltmarch", "name": "Saltmarch", "modelledOn": "Atlantic coast",
+      "blurb": "Fishing towns, shipyards and some offshore oil. Many of your people are older, so health care and pensions cost a lot.",
+      "population": 2,
+      "production": { "food": 12, "energy": 6, "materials": 3 },
+      "needs": { "food": 8, "energy": 7, "materials": 5 },
+      "services": 10,
+      "spendingBaseline": {"health": 3.0, "education": 1.5, "infrastructure": 1.5, "social": 2.0},
+      "costFactor": 1.0,
+      "debt": 10,
+      "startSystem": 3,
+      "groupShare": { "workers": 0.25, "families": 0.25, "businesses": 0.15, "seniors": 0.35 },
+      "startApproval": { "workers": 50, "families": 50, "businesses": 50, "seniors": 50 },
+      "strongIn": ["food"], "shortOn": ["money", "materials"]
+    },
+    {
+      "id": "northreach", "name": "Northreach", "modelledOn": "The far north",
+      "blurb": "Huge land, rich mines and very few people. Winters are long and everything costs more to ship in.",
+      "population": 1,
+      "production": { "food": 1, "energy": 3, "materials": 12 },
+      "needs": { "food": 5, "energy": 6, "materials": 4 },
+      "services": 10,
+      "spendingBaseline": {"health": 1.5, "education": 1.0, "infrastructure": 1.0, "social": 1.0},
+      "costFactor": 1.3,
+      "debt": 5,
+      "startSystem": 3,
+      "groupShare": { "workers": 0.45, "families": 0.30, "businesses": 0.15, "seniors": 0.10 },
+      "startApproval": { "workers": 50, "families": 50, "businesses": 52, "seniors": 50 },
+      "strongIn": ["materials"], "shortOn": ["food", "energy", "money"]
+    }
+  ],
+
+  "investmentProjects": [
+    { "id": "power-line", "name": "New power plant", "costPctRevenue": 40, "text": "Borrow to build a power plant. You make more energy every year after.", "effects": [ { "type": "baseProduction", "resource": "energy", "amount": 2 }, { "type": "approval", "group": "workers", "amount": 1 } ] },
+    { "id": "modern-farms", "name": "Modern farms", "costPctRevenue": 40, "text": "Help farmers buy better equipment. You grow more food every year after.", "effects": [ { "type": "baseProduction", "resource": "food", "amount": 2 }, { "type": "approval", "group": "families", "amount": 1 } ] },
+    { "id": "tech-college", "name": "Tech college", "costPctRevenue": 40, "text": "Build a college for new jobs. It takes time, but your workers get more skilled.", "effects": [ { "type": "skill", "amount": 2 }, { "type": "approval", "group": "families", "amount": 1 } ] },
+    { "id": "highway", "name": "Highway and rail upgrade", "costPctRevenue": 40, "text": "Faster roads and trains. Your farms, mines and factories all produce more.", "effects": [ { "type": "infrastructure", "amount": 2 }, { "type": "approval", "group": "businesses", "amount": 1 } ] }
+  ],
+
+  "cards": {
+    "localIssues": [
+      {
+        "id": "westhaven-port", "province": "westhaven", "title": "A Bigger Port?",
+        "text": "Shipping companies want a bigger port in Westhaven. More ships mean more trade and more jobs. People who live near the harbour worry about noise and traffic.",
+        "tags": ["ES4", "ES8", "EK9"],
+        "choices": [
+          { "id": "public", "label": "Build it with public money", "hint": "Costs a lot now. Workers and businesses like it.", "effects": [ { "type": "money", "pctRevenue": -30 }, { "type": "services", "pct": 6, "start": "next", "years": 99 }, { "type": "unemployment", "amount": -1 }, { "type": "approval", "group": "workers", "amount": 2 }, { "type": "approval", "group": "businesses", "amount": 2 }, { "type": "approval", "group": "families", "amount": -1 } ] },
+          { "id": "private", "label": "Let a private company build and run it", "hint": "Free for you. The company sets the fees.", "effects": [ { "type": "services", "pct": 3, "start": "next", "years": 99 }, { "type": "approval", "group": "businesses", "amount": 3 }, { "type": "approval", "group": "families", "amount": -2 } ] },
+          { "id": "no", "label": "Say no for now", "hint": "Neighbours are happy. Businesses are not.", "effects": [ { "type": "approval", "group": "families", "amount": 2 }, { "type": "approval", "group": "businesses", "amount": -3 } ] }
+        ],
+        "debrief": "Who decided how the port is built in each choice: the government or a company?"
+      },
+      {
+        "id": "westhaven-forest", "province": "westhaven", "title": "The Old Forest",
+        "text": "A timber company wants to cut down an old forest. It would bring jobs and lots of wood. Many people want the forest protected for good.",
+        "tags": ["ES8", "EK1"],
+        "choices": [
+          { "id": "log", "label": "Allow logging", "hint": "More materials and jobs. Families and seniors are upset.", "effects": [ { "type": "production", "resource": "materials", "pct": 25, "start": "next", "years": 2 }, { "type": "approval", "group": "workers", "amount": 2 }, { "type": "approval", "group": "businesses", "amount": 2 }, { "type": "approval", "group": "families", "amount": -2 }, { "type": "approval", "group": "seniors", "amount": -1 } ] },
+          { "id": "protect", "label": "Protect the forest", "hint": "Families cheer. Forestry workers lose out.", "effects": [ { "type": "approval", "group": "families", "amount": 2 }, { "type": "approval", "group": "seniors", "amount": 1 }, { "type": "approval", "group": "workers", "amount": -2 } ] },
+          { "id": "limited", "label": "Allow some logging with replanting rules", "hint": "A middle path. Rules cost money to check.", "effects": [ { "type": "money", "pctRevenue": -10 }, { "type": "production", "resource": "materials", "pct": 10, "start": "next", "years": 2 }, { "type": "approval", "group": "workers", "amount": 1 }, { "type": "approval", "group": "families", "amount": 1 } ] }
+        ],
+        "debrief": "What did your province give up in each choice? That is the trade-off."
+      },
+      {
+        "id": "ridgeland-windfall", "province": "ridgeland", "title": "Save It or Spend It?",
+        "text": "Energy companies paid you extra royalties this year, about half a year of tax money more than you planned. Do you save it for hard times, spend it now, or give it back as a tax cut?",
+        "tags": ["EK17", "ES6", "EK14"],
+        "choices": [
+          { "id": "save", "label": "Save it in a rainy-day fund", "hint": "Lowers your debt. Nobody sees it right away.", "effects": [ { "type": "money", "pctRevenue": 50 }, { "type": "approval", "group": "seniors", "amount": 1 }, { "type": "approval", "group": "businesses", "amount": 1 } ] },
+          { "id": "spend", "label": "Spend it on hospitals and schools", "hint": "Families and seniors like it now.", "effects": [ { "type": "approval", "group": "families", "amount": 3 }, { "type": "approval", "group": "seniors", "amount": 2 }, { "type": "skill", "amount": 1 } ] },
+          { "id": "cut", "label": "Give it back as a one-year tax cut", "hint": "Businesses and workers cheer. The money is gone.", "effects": [ { "type": "approval", "group": "businesses", "amount": 3 }, { "type": "approval", "group": "workers", "amount": 2 }, { "type": "growth", "amount": 1 } ] }
+        ],
+        "debrief": "If energy prices fall next year, which choice will you be glad you made?"
+      },
+      {
+        "id": "ridgeland-pipeline", "province": "ridgeland", "title": "A Pipeline to the Coast",
+        "text": "A company wants to build a pipeline from Ridgeland to the Westhaven port. You could sell more energy. Towns along the route worry about spills. Westhaven has to agree to the route.",
+        "tags": ["ES8", "EK4", "G9"],
+        "choices": [
+          { "id": "yes", "label": "Support the pipeline", "hint": "More energy sales. Some Westhaven families object.", "effects": [ { "type": "production", "resource": "energy", "pct": 15, "start": "next", "years": 2 }, { "type": "approval", "group": "businesses", "amount": 3 }, { "type": "approval", "group": "workers", "amount": 2 }, { "type": "approval", "group": "families", "amount": -1 }, { "type": "approval", "group": "families", "amount": -2, "target": "westhaven" } ] },
+          { "id": "rules", "label": "Support it with strict safety rules", "hint": "Smaller gain. Costs a little. Fewer people upset.", "effects": [ { "type": "money", "pctRevenue": -10 }, { "type": "production", "resource": "energy", "pct": 8, "start": "next", "years": 2 }, { "type": "approval", "group": "businesses", "amount": 1 }, { "type": "approval", "group": "workers", "amount": 1 } ] },
+          { "id": "no", "label": "Say no", "hint": "No risk of spills. Energy workers are angry.", "effects": [ { "type": "approval", "group": "families", "amount": 1 }, { "type": "approval", "group": "workers", "amount": -2 }, { "type": "approval", "group": "businesses", "amount": -3 } ] }
+        ],
+        "debrief": "Your choice changed another province's approval. Should one province get a say in another's project?"
+      },
+      {
+        "id": "goldplain-towns", "province": "goldplain", "title": "Small Towns Fading",
+        "text": "Young people are moving from small towns to the cities. Schools, clinics and stores are closing. The people who stay feel left behind.",
+        "tags": ["ES8", "EK8", "EK9"],
+        "choices": [
+          { "id": "invest", "label": "Pay for rural internet and clinics", "hint": "Costs money. Families and seniors feel cared for.", "effects": [ { "type": "money", "pctRevenue": -25 }, { "type": "approval", "group": "families", "amount": 2 }, { "type": "approval", "group": "seniors", "amount": 2 }, { "type": "growth", "amount": 1 } ] },
+          { "id": "market", "label": "Let towns change on their own", "hint": "No cost. Some towns will keep shrinking.", "effects": [ { "type": "approval", "group": "businesses", "amount": 1 }, { "type": "approval", "group": "seniors", "amount": -2 }, { "type": "approval", "group": "families", "amount": -1 } ] },
+          { "id": "grants", "label": "Pay new businesses to open in small towns", "hint": "Some cost. Creates jobs.", "effects": [ { "type": "money", "pctRevenue": -12 }, { "type": "unemployment", "amount": -1 }, { "type": "approval", "group": "workers", "amount": 1 }, { "type": "approval", "group": "businesses", "amount": 1 } ] }
+        ],
+        "debrief": "Who should decide whether a small town survives: the market or the government?"
+      },
+      {
+        "id": "goldplain-mine", "province": "goldplain", "title": "The Potash Mine Offer",
+        "text": "A large company wants to open a huge potash mine. It would bring jobs and money. It would also use a lot of energy and water.",
+        "tags": ["EK6", "EK7", "ES1"],
+        "choices": [
+          { "id": "lowtax", "label": "Yes, and give the company low taxes to come", "hint": "Jobs and materials. The mine uses more energy.", "effects": [ { "type": "baseProduction", "resource": "materials", "amount": 3 }, { "type": "need", "resource": "energy", "amount": 1, "years": 99 }, { "type": "approval", "group": "businesses", "amount": 3 }, { "type": "approval", "group": "workers", "amount": 2 } ] },
+          { "id": "public", "label": "Yes, but the province owns part of the mine", "hint": "Costs money now. Pays you back for years.", "effects": [ { "type": "money", "pctRevenue": -30 }, { "type": "money", "pctRevenue": 12, "start": "next", "years": 5 }, { "type": "baseProduction", "resource": "materials", "amount": 3 }, { "type": "need", "resource": "energy", "amount": 1, "years": 99 }, { "type": "approval", "group": "workers", "amount": 2 }, { "type": "approval", "group": "businesses", "amount": -1 } ] },
+          { "id": "no", "label": "No mine", "hint": "Water stays safe. No new jobs.", "effects": [ { "type": "approval", "group": "families", "amount": 1 }, { "type": "approval", "group": "workers", "amount": -1 } ] }
+        ],
+        "debrief": "Choice 1 is closer to a market economy. Choice 2 is closer to command. What is the difference?"
+      },
+      {
+        "id": "lakemoor-robots", "province": "lakemoor", "title": "Robots in the Factories",
+        "text": "Car factories want to replace workers with robots. The factories would make more for less. About 2,000 people could lose their jobs.",
+        "tags": ["EK4", "EK10", "ES4"],
+        "choices": [
+          { "id": "allow", "label": "Let the factories decide", "hint": "More money for the economy. Workers lose jobs.", "effects": [ { "type": "services", "pct": 5, "start": "next", "years": 99 }, { "type": "unemployment", "amount": 2 }, { "type": "approval", "group": "businesses", "amount": 3 }, { "type": "approval", "group": "workers", "amount": -4 } ] },
+          { "id": "retrain", "label": "Allow robots and pay to retrain workers", "hint": "Costs money. Most workers find new jobs.", "effects": [ { "type": "money", "pctRevenue": -15 }, { "type": "services", "pct": 3, "start": "next", "years": 99 }, { "type": "skill", "amount": 1 }, { "type": "approval", "group": "workers", "amount": 1 }, { "type": "approval", "group": "businesses", "amount": 1 } ] },
+          { "id": "block", "label": "Ban the robots", "hint": "Jobs stay. Factories fall behind.", "effects": [ { "type": "growth", "amount": -1 }, { "type": "approval", "group": "workers", "amount": 3 }, { "type": "approval", "group": "businesses", "amount": -4 } ] }
+        ],
+        "debrief": "Look at GDP and unemployment next year. Did they move in the same direction?"
+      },
+      {
+        "id": "lakemoor-traffic", "province": "lakemoor", "title": "Traffic Jam City",
+        "text": "Traffic in Lakemoor's biggest city is the worst in Borealis. Trucks sit still. Commuters are angry. Something has to change.",
+        "tags": ["EK13", "ES6", "EK18"],
+        "choices": [
+          { "id": "subway", "label": "Build a new subway line", "hint": "Expensive. Pays off for years.", "effects": [ { "type": "money", "pctRevenue": -25 }, { "type": "infrastructure", "amount": 2 }, { "type": "unemployment", "amount": -1 }, { "type": "approval", "group": "families", "amount": 2 }, { "type": "approval", "group": "workers", "amount": 1 }, { "type": "approval", "group": "businesses", "amount": 1 } ] },
+          { "id": "fee", "label": "Charge drivers a fee to enter downtown", "hint": "Brings in money. Drivers hate it.", "effects": [ { "type": "money", "pctRevenue": 8, "years": 3 }, { "type": "approval", "group": "families", "amount": -2 }, { "type": "approval", "group": "workers", "amount": -2 }, { "type": "approval", "group": "businesses", "amount": 1 } ] },
+          { "id": "wait", "label": "Do nothing for now", "hint": "No cost. Everyone stays stuck.", "effects": [ { "type": "growth", "amount": -0.5 }, { "type": "approval", "group": "businesses", "amount": -2 }, { "type": "approval", "group": "families", "amount": -1 } ] }
+        ],
+        "debrief": "Is borrowing for a subway a good reason to run a deficit? Why?"
+      },
+      {
+        "id": "valcourt-hydro", "province": "valcourt", "title": "Sell the Hydro Power?",
+        "text": "Valcourt's dams make more electricity than you need. A country across the border wants to buy some of it on a long contract.",
+        "tags": ["EK1", "ES1", "G9"],
+        "choices": [
+          { "id": "export", "label": "Sign the export deal", "hint": "Steady money for years. Less energy at home.", "effects": [ { "type": "baseProduction", "resource": "energy", "amount": -3 }, { "type": "money", "pctRevenue": 20, "start": "next", "years": 5 }, { "type": "approval", "group": "businesses", "amount": 2 } ] },
+          { "id": "factories", "label": "Keep the power to attract new factories", "hint": "More jobs and materials at home.", "effects": [ { "type": "baseProduction", "resource": "materials", "amount": 2 }, { "type": "unemployment", "amount": -1 }, { "type": "approval", "group": "workers", "amount": 2 } ] },
+          { "id": "bills", "label": "Lower power bills for families", "hint": "Families and seniors save money. The treasury pays.", "effects": [ { "type": "money", "pctRevenue": -15 }, { "type": "approval", "group": "families", "amount": 3 }, { "type": "approval", "group": "seniors", "amount": 2 } ] }
+        ],
+        "debrief": "Each choice answers 'for whom?' differently. Explain one."
+      },
+      {
+        "id": "valcourt-culture", "province": "valcourt", "title": "Keep Our Culture Strong",
+        "text": "Valcourt's language and culture are part of what makes it special. Local artists, schools and TV shows ask for more support. Some say the money should go to hospitals first.",
+        "tags": ["ES8", "EK13"],
+        "choices": [
+          { "id": "fund", "label": "Fund language and culture programs", "hint": "Costs money. Families and seniors are proud.", "effects": [ { "type": "money", "pctRevenue": -15 }, { "type": "approval", "group": "families", "amount": 2 }, { "type": "approval", "group": "seniors", "amount": 2 }, { "type": "services", "pct": 2, "start": "next", "years": 99 } ] },
+          { "id": "compete", "label": "Let culture groups raise their own money", "hint": "No cost. Some programs close.", "effects": [ { "type": "approval", "group": "businesses", "amount": 1 }, { "type": "approval", "group": "families", "amount": -2 }, { "type": "approval", "group": "seniors", "amount": -2 } ] },
+          { "id": "partner", "label": "Share the cost with local businesses", "hint": "Small cost. A bit for everyone.", "effects": [ { "type": "money", "pctRevenue": -5 }, { "type": "approval", "group": "businesses", "amount": 1 }, { "type": "approval", "group": "families", "amount": 1 } ] }
+        ],
+        "debrief": "Is protecting culture a need or a want? Can it be both?"
+      },
+      {
+        "id": "saltmarch-fishing-custom", "province": "saltmarch", "title": "The Fishing Grounds",
+        "text": "For generations, Saltmarch fishing families have shared the fishing grounds by custom. Each family fishes its own spot, the way their parents did. Now there are fewer fish each year. How should you decide who fishes?",
+        "tags": ["EK2", "EK3", "ES1", "EU1"],
+        "choices": [
+          { "id": "keep-custom", "label": "Keep the old customs", "hint": "Tradition decides. Seniors are glad. Fish keep falling.", "economy": "traditional", "effects": [ { "type": "production", "resource": "food", "pct": -10, "start": "next", "years": 2 }, { "type": "approval", "group": "seniors", "amount": 3 }, { "type": "approval", "group": "families", "amount": 1 }, { "type": "approval", "group": "businesses", "amount": -1 } ] },
+          { "id": "sell-licences", "label": "Sell fishing licences to the highest bidder", "hint": "The market decides. Big boats win. Money now.", "economy": "market", "effects": [ { "type": "money", "pctRevenue": 30 }, { "type": "production", "resource": "food", "pct": 10, "start": "next", "years": 2 }, { "type": "approval", "group": "businesses", "amount": 3 }, { "type": "approval", "group": "workers", "amount": -2 }, { "type": "approval", "group": "seniors", "amount": -2 } ] },
+          { "id": "quota", "label": "The government sets a catch limit for every boat", "hint": "The government decides. Less fish now, more later.", "economy": "command", "effects": [ { "type": "money", "pctRevenue": -10 }, { "type": "production", "resource": "food", "pct": -10, "start": "next", "years": 1 }, { "type": "baseProduction", "resource": "food", "amount": 2 }, { "type": "approval", "group": "families", "amount": 1 }, { "type": "approval", "group": "workers", "amount": -1 } ] }
+        ],
+        "debrief": "Name the economic system behind each choice: traditional, market or command."
+      },
+      {
+        "id": "saltmarch-shipyard", "province": "saltmarch", "title": "The Shipyard Contract",
+        "text": "Your shipyard could build ferries for all of Borealis. First it needs an expensive upgrade. Hundreds of jobs depend on it.",
+        "tags": ["EK18", "ES6", "ES7"],
+        "choices": [
+          { "id": "borrow", "label": "Borrow to upgrade the shipyard", "hint": "Big cost now. Jobs and income later.", "effects": [ { "type": "money", "pctRevenue": -40 }, { "type": "unemployment", "amount": -2 }, { "type": "services", "pct": 12, "start": "next", "years": 99 }, { "type": "approval", "group": "workers", "amount": 3 } ] },
+          { "id": "private", "label": "Sell part of the shipyard to a private company", "hint": "No cost. The company keeps most of the profit.", "effects": [ { "type": "money", "pctRevenue": 20 }, { "type": "services", "pct": 5, "start": "next", "years": 99 }, { "type": "approval", "group": "businesses", "amount": 2 }, { "type": "approval", "group": "workers", "amount": -1 } ] },
+          { "id": "close", "label": "Close the shipyard and retrain workers", "hint": "Saves money later. Jobs are lost now.", "effects": [ { "type": "money", "pctRevenue": -10 }, { "type": "unemployment", "amount": 2 }, { "type": "skill", "amount": 1 }, { "type": "approval", "group": "workers", "amount": -3 }, { "type": "approval", "group": "seniors", "amount": -1 } ] }
+        ],
+        "debrief": "Was borrowing worth it? Check your debt and GDP in two years."
+      },
+      {
+        "id": "northreach-cost", "province": "northreach", "title": "The Cost of Living",
+        "text": "Food in Northreach costs three times more than in the south. It comes in by plane or on long winter roads. Families are struggling.",
+        "tags": ["EK8", "ES8", "EK10"],
+        "choices": [
+          { "id": "subsidy", "label": "Pay part of the shipping cost for food", "hint": "Costs every year it lasts. Families feel the help now.", "effects": [ { "type": "money", "pctRevenue": -20, "years": 2 }, { "type": "inflation", "amount": -2 }, { "type": "approval", "group": "families", "amount": 3 }, { "type": "approval", "group": "seniors", "amount": 2 }, { "type": "approval", "group": "workers", "amount": 1 } ] },
+          { "id": "greenhouse", "label": "Build community greenhouses", "hint": "Costs more now. Grows food for years.", "effects": [ { "type": "money", "pctRevenue": -40 }, { "type": "baseProduction", "resource": "food", "amount": 2 }, { "type": "approval", "group": "families", "amount": 1 } ] },
+          { "id": "wait", "label": "Hope prices fall on their own", "hint": "No cost. Families stay angry.", "effects": [ { "type": "approval", "group": "families", "amount": -3 }, { "type": "approval", "group": "seniors", "amount": -2 }, { "type": "approval", "group": "businesses", "amount": 1 } ] }
+        ],
+        "debrief": "Which choice helps now and which helps later? Which would you pick in a deficit year?"
+      },
+      {
+        "id": "northreach-mine", "province": "northreach", "title": "New Mine, New Town",
+        "text": "A company wants to open a rare metals mine far from any town. It needs a new road and a power line. It would bring many jobs.",
+        "tags": ["EK6", "EK7", "ES4"],
+        "choices": [
+          { "id": "build", "label": "The province builds the road and power line", "hint": "Big cost. You own the road. Lots of jobs.", "effects": [ { "type": "money", "pctRevenue": -45 }, { "type": "baseProduction", "resource": "materials", "amount": 4 }, { "type": "need", "resource": "energy", "amount": 1, "years": 99 }, { "type": "unemployment", "amount": -2 }, { "type": "approval", "group": "workers", "amount": 3 }, { "type": "approval", "group": "businesses", "amount": 2 } ] },
+          { "id": "company", "label": "Let the company build and own the road", "hint": "No cost. The company charges to use the road.", "effects": [ { "type": "baseProduction", "resource": "materials", "amount": 3 }, { "type": "approval", "group": "businesses", "amount": 2 }, { "type": "approval", "group": "families", "amount": -1 } ] },
+          { "id": "study", "label": "Wait and study the effect on land and wildlife", "hint": "No change for now. Workers wanted those jobs.", "effects": [ { "type": "approval", "group": "families", "amount": 1 }, { "type": "approval", "group": "seniors", "amount": 1 }, { "type": "approval", "group": "workers", "amount": -2 } ] }
+        ],
+        "debrief": "Who owns the road in each choice? Why does that matter?"
+      },
+
+      {
+        "id": "gen-hospital-waits", "province": null, "title": "Long Hospital Waits",
+        "text": "People wait months for surgery. Doctors say they need more nurses. A company offers to open private clinics where people can pay to skip the line.",
+        "tags": ["EK8", "EK9", "ES8"],
+        "choices": [
+          { "id": "hire", "label": "Hire more nurses", "hint": "Costs money. Seniors and families are relieved.", "effects": [ { "type": "money", "pctRevenue": -12 }, { "type": "approval", "group": "seniors", "amount": 3 }, { "type": "approval", "group": "families", "amount": 2 } ] },
+          { "id": "private", "label": "Allow private pay clinics", "hint": "No cost. People who can pay get care faster.", "effects": [ { "type": "approval", "group": "businesses", "amount": 2 }, { "type": "approval", "group": "families", "amount": -1 }, { "type": "approval", "group": "seniors", "amount": -1 } ] },
+          { "id": "wait", "label": "Keep things as they are", "hint": "No cost. Waits get longer.", "effects": [ { "type": "approval", "group": "seniors", "amount": -3 }, { "type": "approval", "group": "families", "amount": -1 } ] }
+        ],
+        "debrief": "Private clinics give more choice to some people. Who loses?"
+      },
+      {
+        "id": "gen-teachers", "province": null, "title": "Teachers Want a Raise",
+        "text": "Teachers say classes are too big and pay is too low. They might go on strike next month.",
+        "tags": ["EK13", "ES8"],
+        "choices": [
+          { "id": "raise", "label": "Give teachers a raise", "hint": "Costs money. Schools improve.", "effects": [ { "type": "money", "pctRevenue": -10 }, { "type": "skill", "amount": 1 }, { "type": "approval", "group": "families", "amount": 2 }, { "type": "approval", "group": "workers", "amount": 1 } ] },
+          { "id": "firm", "label": "Hold firm: no raise", "hint": "Saves money. A strike closes schools for a week.", "effects": [ { "type": "approval", "group": "businesses", "amount": 1 }, { "type": "approval", "group": "families", "amount": -3 }, { "type": "skill", "amount": -1 } ] },
+          { "id": "half", "label": "Meet halfway", "hint": "Some cost. Nobody is thrilled.", "effects": [ { "type": "money", "pctRevenue": -5 }, { "type": "approval", "group": "families", "amount": 1 } ] }
+        ],
+        "debrief": "Where does the money for a raise come from: taxes, cuts, or borrowing?"
+      },
+      {
+        "id": "gen-housing", "province": null, "title": "No Place to Live",
+        "text": "Rents are rising fast. More people are living in cars and shelters. Charities say they cannot keep up.",
+        "tags": ["EK8", "ES8", "EK13"],
+        "choices": [
+          { "id": "build", "label": "Build affordable housing", "hint": "Big cost. Uses materials. Helps many people.", "effects": [ { "type": "money", "pctRevenue": -12 }, { "type": "need", "resource": "materials", "amount": 1 }, { "type": "approval", "group": "families", "amount": 2 }, { "type": "approval", "group": "workers", "amount": 2 }, { "type": "approval", "group": "seniors", "amount": 1 } ] },
+          { "id": "shelters", "label": "Fund more shelter beds", "hint": "Small cost. Helps in an emergency only.", "effects": [ { "type": "money", "pctRevenue": -4 }, { "type": "approval", "group": "families", "amount": 1 } ] },
+          { "id": "charities", "label": "Leave it to charities and builders", "hint": "No cost. The problem grows.", "effects": [ { "type": "approval", "group": "businesses", "amount": 1 }, { "type": "approval", "group": "families", "amount": -2 }, { "type": "approval", "group": "workers", "amount": -1 } ] }
+        ],
+        "debrief": "Is housing a job for the market, the government, or both?"
+      },
+      {
+        "id": "gen-tech-company", "province": null, "title": "A Tech Company Wants a Deal",
+        "text": "A big tech company will move its offices here if you give it a tax break. It would bring good jobs. Local businesses ask why they do not get the same deal.",
+        "tags": ["EK6", "ES4"],
+        "choices": [
+          { "id": "yes", "label": "Give the tax break", "hint": "Less money now. Faster growth later.", "effects": [ { "type": "money", "pctRevenue": -8 }, { "type": "growth", "amount": 1 }, { "type": "services", "pct": 3, "start": "next", "years": 99 }, { "type": "approval", "group": "businesses", "amount": 2 }, { "type": "approval", "group": "workers", "amount": 1 } ] },
+          { "id": "no", "label": "Say no: same rules for everyone", "hint": "No cost. The jobs go somewhere else.", "effects": [ { "type": "approval", "group": "businesses", "amount": -1 }, { "type": "approval", "group": "workers", "amount": 1 } ] }
+        ],
+        "debrief": "Is it fair to give one company a special deal? What does the province get back?"
+      },
+      {
+        "id": "gen-old-bridge", "province": null, "title": "The Old Town Bridge",
+        "text": "Engineers say the bridge into a small town is unsafe. It is the only road to the school and the grocery store.",
+        "tags": ["EK13", "ES6"],
+        "choices": [
+          { "id": "repair", "label": "Repair it now", "hint": "Costs money and materials. Problem solved.", "effects": [ { "type": "money", "pctRevenue": -8 }, { "type": "need", "resource": "materials", "amount": 1 }, { "type": "infrastructure", "amount": 1 }, { "type": "approval", "group": "families", "amount": 1 } ] },
+          { "id": "toll", "label": "Repair it and charge a toll", "hint": "Pays for itself. Drivers pay.", "effects": [ { "type": "need", "resource": "materials", "amount": 1 }, { "type": "infrastructure", "amount": 1 }, { "type": "approval", "group": "families", "amount": -1 }, { "type": "approval", "group": "workers", "amount": -1 } ] },
+          { "id": "close", "label": "Close it for now", "hint": "No cost. A long detour for everyone.", "effects": [ { "type": "approval", "group": "families", "amount": -2 }, { "type": "approval", "group": "workers", "amount": -1 }, { "type": "approval", "group": "businesses", "amount": -1 } ] }
+        ],
+        "debrief": "A toll means users pay. Taxes mean everyone pays. Which is fairer?"
+      },
+      {
+        "id": "gen-minimum-wage", "province": null, "title": "Raise the Minimum Wage?",
+        "text": "Workers say they cannot pay rent on the minimum wage. Small businesses say a big raise means fewer jobs.",
+        "tags": ["EK8", "EK6", "ES4"],
+        "choices": [
+          { "id": "big", "label": "Raise it a lot", "hint": "Workers cheer. Some small shops cut jobs.", "effects": [ { "type": "unemployment", "amount": 0.5 }, { "type": "approval", "group": "workers", "amount": 4 }, { "type": "approval", "group": "businesses", "amount": -4 } ] },
+          { "id": "small", "label": "Raise it a little", "hint": "A small win for workers.", "effects": [ { "type": "approval", "group": "workers", "amount": 2 }, { "type": "approval", "group": "businesses", "amount": -1 } ] },
+          { "id": "none", "label": "Leave it alone", "hint": "Businesses are relieved. Workers are not.", "effects": [ { "type": "approval", "group": "workers", "amount": -2 }, { "type": "approval", "group": "businesses", "amount": 2 } ] }
+        ],
+        "debrief": "A government rule here limits a business's choice. When is that worth it?"
+      },
+      {
+        "id": "gen-power-plant", "province": null, "title": "An Old Power Plant",
+        "text": "Your oldest power plant is wearing out. It also makes the air dirty. Fixing it, replacing it or closing it all have a cost.",
+        "tags": ["EK1", "ES8", "EK18"],
+        "choices": [
+          { "id": "rebuild", "label": "Build a new, cleaner plant", "hint": "Big cost. More energy for years.", "effects": [ { "type": "money", "pctRevenue": -15 }, { "type": "baseProduction", "resource": "energy", "amount": 2 }, { "type": "approval", "group": "families", "amount": 1 }, { "type": "approval", "group": "workers", "amount": 1 } ] },
+          { "id": "patch", "label": "Patch it up", "hint": "Small cost. The problem comes back.", "effects": [ { "type": "money", "pctRevenue": -4 } ] },
+          { "id": "close", "label": "Close it", "hint": "Cleaner air. Less energy. Some jobs lost.", "effects": [ { "type": "baseProduction", "resource": "energy", "amount": -2 }, { "type": "approval", "group": "families", "amount": 2 }, { "type": "approval", "group": "workers", "amount": -1 } ] }
+        ],
+        "debrief": "Which choice is worth borrowing for? Why?"
+      },
+      {
+        "id": "gen-grocery-prices", "province": null, "title": "Grocery Prices Are Up",
+        "text": "Families are shocked at the grocery bill. Some want the government to set a maximum price on basic food.",
+        "tags": ["EK7", "EK8", "EK10"],
+        "choices": [
+          { "id": "cap", "label": "Set a maximum price on basic food", "hint": "Prices stop rising. Some farms grow less.", "effects": [ { "type": "inflation", "amount": -2 }, { "type": "production", "resource": "food", "pct": -10, "start": "next" }, { "type": "approval", "group": "families", "amount": 2 }, { "type": "approval", "group": "businesses", "amount": -3 } ] },
+          { "id": "benefit", "label": "Send families a grocery benefit", "hint": "Costs money. Families get help now.", "effects": [ { "type": "money", "pctRevenue": -8 }, { "type": "approval", "group": "families", "amount": 2 }, { "type": "approval", "group": "seniors", "amount": 1 } ] },
+          { "id": "none", "label": "Let prices find their own level", "hint": "No cost. Families are upset.", "effects": [ { "type": "approval", "group": "families", "amount": -2 }, { "type": "approval", "group": "businesses", "amount": 1 } ] }
+        ],
+        "debrief": "A price cap is a command economy tool. What happened to the amount of food produced?"
+      },
+      {
+        "id": "gen-arena", "province": null, "title": "A New Sports Arena",
+        "text": "The local hockey team wants a new arena. The owners want the province to pay for half. Fans love the idea.",
+        "tags": ["EK13", "ES8"],
+        "choices": [
+          { "id": "pay", "label": "Pay for half", "hint": "Costs a lot. Fans and businesses are happy.", "effects": [ { "type": "money", "pctRevenue": -12 }, { "type": "unemployment", "amount": -0.5 }, { "type": "approval", "group": "businesses", "amount": 2 }, { "type": "approval", "group": "workers", "amount": 1 }, { "type": "approval", "group": "families", "amount": 1 } ] },
+          { "id": "owners", "label": "The owners pay for it all", "hint": "No cost. The team may move away.", "effects": [ { "type": "approval", "group": "businesses", "amount": -1 }, { "type": "approval", "group": "seniors", "amount": 1 } ] }
+        ],
+        "debrief": "Should public money pay for things a private business will profit from?"
+      },
+      {
+        "id": "gen-seniors-care", "province": null, "title": "Not Enough Care Homes",
+        "text": "More people are living longer. There are not enough care homes or home-care nurses. Families are worried.",
+        "tags": ["EK13", "ES8"],
+        "choices": [
+          { "id": "build", "label": "Build new care homes", "hint": "Big cost. Seniors are grateful.", "effects": [ { "type": "money", "pctRevenue": -12 }, { "type": "approval", "group": "seniors", "amount": 4 }, { "type": "approval", "group": "families", "amount": 1 } ] },
+          { "id": "home", "label": "Pay for more home-care visits", "hint": "Smaller cost. Helps many people stay home.", "effects": [ { "type": "money", "pctRevenue": -5 }, { "type": "approval", "group": "seniors", "amount": 2 } ] },
+          { "id": "none", "label": "Families must sort it out", "hint": "No cost. Seniors and families are upset.", "effects": [ { "type": "approval", "group": "seniors", "amount": -3 }, { "type": "approval", "group": "families", "amount": -1 } ] }
+        ],
+        "debrief": "Who should look after people who cannot look after themselves?"
+      }
+    ],
+
+    "nationalEvents": [
+      {
+        "id": "drought", "title": "Prairie Drought", "category": "drought",
+        "headline": "No rain all summer. Crops dry up across the west.",
+        "text": "Farms in Goldplain, Ridgeland and Westhaven grow much less food this year. Food prices rise across Borealis.",
+        "tags": ["EK1", "EK4", "CK3", "EK10"],
+        "auto": [
+          { "type": "production", "resource": "food", "pct": -30, "target": "goldplain" },
+          { "type": "production", "resource": "food", "pct": -20, "target": "ridgeland" },
+          { "type": "production", "resource": "food", "pct": -15, "target": "westhaven" }
+        ],
+        "choices": [
+          { "id": "aid-farmers", "label": "Give your farmers emergency aid", "hint": "Costs money. Farms recover faster next year.", "effects": [ { "type": "money", "pctRevenue": -8 }, { "type": "production", "resource": "food", "pct": 15, "start": "next" }, { "type": "approval", "group": "workers", "amount": 1 }, { "type": "approval", "group": "families", "amount": 1 } ] },
+          { "id": "waste-less", "label": "Ask everyone to waste less food", "hint": "No cost. You need less food this year. People grumble.", "effects": [ { "type": "need", "resource": "food", "pct": -10 }, { "type": "approval", "group": "families", "amount": -1 } ] },
+          { "id": "nothing", "label": "Let the market handle it", "hint": "No cost. Prices stay high.", "effects": [ { "type": "inflation", "amount": 1 }, { "type": "approval", "group": "businesses", "amount": 1 } ] }
+        ],
+        "debrief": "The drought hit three provinces. Why did food prices rise everywhere?"
+      },
+      {
+        "id": "energy-crash", "title": "Energy Prices Crash", "category": "price swing",
+        "headline": "World oil and gas prices fall by half.",
+        "text": "Energy sells for much less this year. Provinces that sell energy earn less. Provinces that buy energy save money.",
+        "tags": ["EK4", "EK11", "CK3", "EK10"],
+        "auto": [
+          { "type": "price", "resource": "energy", "mult": 0.5 },
+          { "type": "unemployment", "amount": 2, "target": "ridgeland" },
+          { "type": "services", "pct": -10, "target": "ridgeland" }
+        ],
+        "choices": [
+          { "id": "keep", "label": "Keep producing and sell cheap", "hint": "No change. Earn less this year.", "effects": [] },
+          { "id": "store", "label": "Cut energy production and wait", "hint": "Fewer jobs now. More energy next year.", "effects": [ { "type": "unemployment", "amount": 1 }, { "type": "production", "resource": "energy", "pct": 10, "start": "next" }, { "type": "approval", "group": "workers", "amount": -1 } ] },
+          { "id": "factories", "label": "Use cheap energy to grow factories", "hint": "Small cost. Faster growth.", "effects": [ { "type": "money", "pctRevenue": -5 }, { "type": "growth", "amount": 1 }, { "type": "approval", "group": "businesses", "amount": 1 } ] }
+        ],
+        "debrief": "The same event helped some provinces and hurt others. Which ones? Why?"
+      },
+      {
+        "id": "flu", "title": "Flu Season", "category": "health",
+        "headline": "A bad flu spreads across Borealis.",
+        "text": "Hospitals fill up and many people miss work. Provinces that spend more on healthcare cope better.",
+        "tags": ["EK13", "ES4", "CK3"],
+        "auto": [
+          { "type": "cost", "category": "health", "pct": 20, "target": "all" },
+          { "type": "unemployment", "amount": 1, "target": "all" },
+          { "type": "approval", "group": "seniors", "amount": -3, "target": "all", "ifSpending": { "category": "health", "atLeast": 4, "scale": 0.3 } }
+        ],
+        "choices": [
+          { "id": "shots", "label": "Free flu shots for everyone", "hint": "Costs money. Seniors and families feel safer.", "effects": [ { "type": "money", "pctRevenue": -5 }, { "type": "approval", "group": "seniors", "amount": 2 }, { "type": "approval", "group": "families", "amount": 1 } ] },
+          { "id": "close", "label": "Close schools for two weeks", "hint": "No cost. Parents miss work. Students fall behind.", "effects": [ { "type": "unemployment", "amount": 1 }, { "type": "skill", "amount": -1 }, { "type": "approval", "group": "families", "amount": -2 }, { "type": "approval", "group": "seniors", "amount": 1 } ] },
+          { "id": "choice", "label": "Let people decide for themselves", "hint": "No cost. More people get sick.", "effects": [ { "type": "approval", "group": "businesses", "amount": 1 }, { "type": "approval", "group": "seniors", "amount": -2 } ] }
+        ],
+        "debrief": "Did healthcare spending you chose earlier pay off this year?"
+      },
+      {
+        "id": "wildfire", "title": "Wildfire Season", "category": "disaster",
+        "headline": "Huge fires burn forests in the west and north.",
+        "text": "Westhaven, Northreach and Ridgeland lose forests and must pay to fight fires. Firefighters from other provinces could help.",
+        "tags": ["EK4", "EK18", "ES6"],
+        "auto": [
+          { "type": "production", "resource": "materials", "pct": -30, "target": ["westhaven", "northreach", "ridgeland"] },
+          { "type": "money", "pctRevenue": -15, "target": ["westhaven", "northreach", "ridgeland"] }
+        ],
+        "choices": [
+          { "id": "help", "label": "Send firefighters to help other provinces", "hint": "Costs a little. Your people feel proud.", "effects": [ { "type": "money", "pctRevenue": -3 }, { "type": "approval", "group": "all", "amount": 1 } ] },
+          { "id": "home", "label": "Protect your own towns first", "hint": "No cost.", "effects": [] },
+          { "id": "bombers", "label": "Buy new water bomber planes", "hint": "Big cost now. Safer for years.", "effects": [ { "type": "money", "pctRevenue": -10 }, { "type": "infrastructure", "amount": 1 }, { "type": "approval", "group": "seniors", "amount": 1 } ] }
+        ],
+        "debrief": "Would you borrow money to fight a disaster? This is a crisis deficit."
+      },
+      {
+        "id": "factory-closure", "title": "Car Plants Close", "category": "economic disruption",
+        "headline": "A global car company shuts plants in Lakemoor and Valcourt.",
+        "text": "Thousands of jobs are gone. Shops near the plants lose customers too.",
+        "tags": ["EK4", "EK10", "CK3"],
+        "auto": [
+          { "type": "unemployment", "amount": 3, "target": "lakemoor" },
+          { "type": "services", "pct": -8, "target": "lakemoor" },
+          { "type": "unemployment", "amount": 2, "target": "valcourt" },
+          { "type": "services", "pct": -5, "target": "valcourt" }
+        ],
+        "choices": [
+          { "id": "retrain", "label": "Pay for job retraining", "hint": "Costs money. Workers find new jobs.", "effects": [ { "type": "money", "pctRevenue": -6 }, { "type": "skill", "amount": 1 }, { "type": "unemployment", "amount": -1 }, { "type": "approval", "group": "workers", "amount": 2 } ] },
+          { "id": "buy-local", "label": "Run a 'Buy Borealis' campaign", "hint": "Small cost. Helps a little everywhere.", "effects": [ { "type": "money", "pctRevenue": -2 }, { "type": "approval", "group": "businesses", "amount": 1 } ] },
+          { "id": "nothing", "label": "Let the market sort it out", "hint": "No cost. Workers are angry.", "effects": [ { "type": "approval", "group": "workers", "amount": -2 }, { "type": "approval", "group": "businesses", "amount": 1 } ] }
+        ],
+        "debrief": "One company's choice in another country changed jobs here. What does that tell you?"
+      },
+      {
+        "id": "tech-boom", "title": "New Technology Arrives", "category": "new technology",
+        "headline": "New machines and software change how work gets done.",
+        "text": "Provinces with skilled workers grow faster. Some old jobs disappear.",
+        "tags": ["EK4", "EK11"],
+        "auto": [
+          { "type": "services", "pct": 5, "target": "all", "ifSpending": { "category": "education", "atLeast": 3, "scale": 1.6 } },
+          { "type": "unemployment", "amount": 1, "target": "all" }
+        ],
+        "choices": [
+          { "id": "train", "label": "Invest in tech training", "hint": "Costs money. Skills rise.", "effects": [ { "type": "money", "pctRevenue": -6 }, { "type": "skill", "amount": 1 }, { "type": "approval", "group": "families", "amount": 1 } ] },
+          { "id": "attract", "label": "Cut taxes for tech companies", "hint": "Less money now. Faster growth.", "effects": [ { "type": "money", "pctRevenue": -4 }, { "type": "growth", "amount": 1 }, { "type": "approval", "group": "businesses", "amount": 2 } ] },
+          { "id": "protect", "label": "Protect old jobs with new rules", "hint": "No cost. Slower growth.", "effects": [ { "type": "growth", "amount": -1 }, { "type": "unemployment", "amount": -1 }, { "type": "approval", "group": "workers", "amount": 2 }, { "type": "approval", "group": "businesses", "amount": -2 } ] }
+        ],
+        "debrief": "Did your education spending pay off this year?"
+      },
+      {
+        "id": "recession", "title": "World Recession", "category": "recession",
+        "headline": "Economies around the world slow down.",
+        "text": "Other countries buy less from Borealis. Businesses earn less, so your tax revenue falls. More people need help.",
+        "tags": ["EK4", "EK12", "EK18", "CK3"],
+        "auto": [
+          { "type": "services", "pct": -8, "target": "all" },
+          { "type": "unemployment", "amount": 2, "target": "all" },
+          { "type": "price", "resource": "energy", "mult": 0.85 },
+          { "type": "price", "resource": "materials", "mult": 0.85 }
+        ],
+        "choices": [
+          { "id": "stimulus", "label": "Spend on building projects to create jobs", "hint": "Costs money. Jobs now. Bigger deficit.", "effects": [ { "type": "money", "pctRevenue": -8 }, { "type": "unemployment", "amount": -1.5 }, { "type": "infrastructure", "amount": 1 }, { "type": "approval", "group": "workers", "amount": 2 } ] },
+          { "id": "tighten", "label": "Tighten the belt: cut office costs", "hint": "Saves money. Some public jobs lost.", "effects": [ { "type": "money", "pctRevenue": 4 }, { "type": "unemployment", "amount": 0.5 }, { "type": "approval", "group": "businesses", "amount": 1 }, { "type": "approval", "group": "workers", "amount": -1 } ] },
+          { "id": "wait", "label": "Wait it out", "hint": "No change.", "effects": [] }
+        ],
+        "debrief": "Why did your revenue fall even though you kept the same tax rate?"
+      },
+      {
+        "id": "newcomers", "title": "Newcomers Arrive", "category": "human migration",
+        "headline": "War overseas forces families to flee. Many come to Borealis.",
+        "text": "Thousands of newcomers arrive. They need homes, schools and health care now. Many are skilled workers ready to fill jobs.",
+        "tags": ["CK3", "EK4", "ES8"],
+        "auto": [
+          { "type": "need", "resource": "food", "amount": 1, "target": "all", "years": 99 },
+          { "type": "cost", "category": "all", "pct": 5, "target": "all", "years": 2 },
+          { "type": "services", "pct": 3, "start": "next", "years": 99, "target": "all" }
+        ],
+        "choices": [
+          { "id": "welcome", "label": "Fund language classes and job help", "hint": "Costs money. Newcomers start work sooner.", "effects": [ { "type": "money", "pctRevenue": -5 }, { "type": "skill", "amount": 1 }, { "type": "growth", "amount": 1 }, { "type": "approval", "group": "families", "amount": 1 } ] },
+          { "id": "basic", "label": "Provide only the basics", "hint": "Small cost. Newcomers take longer to settle.", "effects": [ { "type": "money", "pctRevenue": -2 } ] },
+          { "id": "charities", "label": "Ask charities and volunteers to lead", "hint": "No cost. Volunteers step up, but it is uneven.", "effects": [ { "type": "approval", "group": "businesses", "amount": 1 }, { "type": "approval", "group": "families", "amount": -1 } ] }
+        ],
+        "debrief": "Newcomers cost money now and add workers later. How is that like other long-term investments?"
+      },
+      {
+        "id": "rates-rise", "title": "Interest Rates Rise", "category": "economic disruption",
+        "headline": "Lenders around the world raise interest rates.",
+        "text": "Borrowing costs more. Provinces with big debts must pay more interest. That money cannot go to schools or hospitals.",
+        "tags": ["ES7", "EK16", "EK17"],
+        "auto": [
+          { "type": "interestRate", "amount": 2, "target": "all", "years": 99 }
+        ],
+        "choices": [
+          { "id": "pay-down", "label": "Make a payment on your debt", "hint": "Costs money now. Less interest later.", "effects": [ { "type": "money", "pctRevenue": -10 }, { "type": "approval", "group": "businesses", "amount": 1 }, { "type": "approval", "group": "seniors", "amount": 1 } ] },
+          { "id": "keep", "label": "Keep spending as planned", "hint": "No change. Interest eats more of your budget.", "effects": [] },
+          { "id": "sell", "label": "Sell a government building", "hint": "Money now. People ask what is next.", "effects": [ { "type": "money", "pctRevenue": 8 }, { "type": "infrastructure", "amount": -1 }, { "type": "approval", "group": "workers", "amount": -1 } ] }
+        ],
+        "debrief": "Why does the same rate rise hurt a province with high debt more?"
+      },
+      {
+        "id": "food-spike", "title": "World Food Prices Jump", "category": "price swing",
+        "headline": "Bad harvests overseas push food prices up everywhere.",
+        "text": "Food costs more this year. Provinces that grow extra food earn more. Provinces that buy food pay more.",
+        "tags": ["EK4", "EK10", "CK3"],
+        "auto": [
+          { "type": "price", "resource": "food", "mult": 1.5 }
+        ],
+        "choices": [
+          { "id": "help", "label": "Help families with food costs", "hint": "Costs money. Families feel it less.", "effects": [ { "type": "money", "pctRevenue": -6 }, { "type": "approval", "group": "families", "amount": 2 } ] },
+          { "id": "export", "label": "Push farmers to sell more", "hint": "No cost. More food to sell next year.", "effects": [ { "type": "production", "resource": "food", "pct": 10, "start": "next" }, { "type": "approval", "group": "businesses", "amount": 1 } ] },
+          { "id": "nothing", "label": "Do nothing", "hint": "No cost.", "effects": [] }
+        ],
+        "debrief": "Was this event good or bad news for your province? Why?"
+      },
+      {
+        "id": "conflict-abroad", "title": "Conflict Overseas", "category": "war",
+        "headline": "A war far away blocks shipping lanes.",
+        "text": "Ships carrying energy and materials around the world are delayed. Energy and materials cost more this year.",
+        "tags": ["CK3", "EK4"],
+        "auto": [
+          { "type": "price", "resource": "energy", "mult": 1.3 },
+          { "type": "price", "resource": "materials", "mult": 1.2 },
+          { "type": "inflation", "amount": 1, "target": "all" }
+        ],
+        "choices": [
+          { "id": "humanitarian", "label": "Send humanitarian aid", "hint": "Small cost. Your people feel proud.", "effects": [ { "type": "money", "pctRevenue": -3 }, { "type": "approval", "group": "families", "amount": 1 }, { "type": "approval", "group": "seniors", "amount": 1 } ] },
+          { "id": "self", "label": "Build up your own energy supply", "hint": "Costs money. More energy next year.", "effects": [ { "type": "money", "pctRevenue": -6 }, { "type": "production", "resource": "energy", "pct": 10, "start": "next" } ] },
+          { "id": "nothing", "label": "Stay focused at home", "hint": "No cost.", "effects": [] }
+        ],
+        "debrief": "How can events on the other side of the world change life in Borealis?"
+      }
+    ],
+
+    "bridgeCrisis": {
+      "id": "narrows-bridge", "title": "The Great Narrows Bridge Falls",
+      "headline": "The only bridge that joins east and west Borealis is closed.",
+      "text": "The Great Narrows Bridge carries the national highway, the railway and the main power line between Goldplain and Lakemoor. Engineers have closed it. It is not safe. Trade between east and west now takes long detours. A new bridge costs $60B. No single province can pay for it.",
+      "location": "Between Goldplain and Lakemoor. Map designer: place it on the narrowest crossing of the big lakes.",
+      "tags": ["PK1", "PS1", "EK18", "G9"],
+      "auto": [
+        { "type": "tradeFee", "pct": 25, "routes": "east-west", "years": 99 },
+        { "type": "unemployment", "amount": 1, "target": ["goldplain", "lakemoor"] }
+      ],
+      "regions": { "west": ["westhaven", "ridgeland", "goldplain", "northreach"], "east": ["lakemoor", "valcourt", "saltmarch"] },
+      "rebuildCost": 60,
+    "pledgeCapPctRevenue": 60,
+      "pledgeRounds": [
+        { "round": 1, "mode": "secret", "minutes": 4, "text": "Each province decides how much to give. Nobody sees the others' pledges until the reveal." },
+        { "round": 2, "mode": "open", "minutes": 6, "text": "Talk it out. Change your pledge. Pledges are shown live on the board." }
+      ],
+      "outcomes": {
+        "short": "Not enough money. Pledges are returned. The bridge stays closed.",
+        "temporary": "Enough for a temporary bridge. It reopens for 2 years, then needs $20B a year to keep safe. Nobody is in charge of paying that.",
+        "note": "Either way, the class sees that provinces acting alone cannot fund or run a national project. This leads into the four ways to decide and a federal Parliament."
+      },
+      "debrief": [
+        "Who paid the most? Who paid the least but still uses the bridge?",
+        "What would make every province pay its fair share?",
+        "Who should decide: one strong leader, a few rich provinces, everyone in a big vote, or elected representatives?"
+      ]
+    }
+  },
+
+  "deck": {
+    "nationalByYear": { "1": null, "2": "tech-boom", "3": "recession", "4": "drought", "5": "energy-crash", "6": "rates-rise" },
+    "spareNational": ["wildfire", "flu", "factory-closure", "newcomers", "food-spike", "conflict-abroad"],
+    "localByYear": { "1": "general", "2": "province-1", "3": "general", "4": "province-2", "5": "general", "6": "general" },
+    "provinceCardOrder": {
+      "westhaven": ["westhaven-port", "westhaven-forest"],
+      "ridgeland": ["ridgeland-pipeline", "ridgeland-windfall"],
+      "goldplain": ["goldplain-mine", "goldplain-towns"],
+      "lakemoor": ["lakemoor-robots", "lakemoor-traffic"],
+      "valcourt": ["valcourt-hydro", "valcourt-culture"],
+      "saltmarch": ["saltmarch-fishing-custom", "saltmarch-shipyard"],
+      "northreach": ["northreach-mine", "northreach-cost"]
+    },
+    "generalDraw": "Draw without replacement from the general cards, shuffled with the class seed. A province never sees the same general card twice.",
+    "underdog": "At the start of each year from Year 2, the province with the lowest approval draws two local cards and picks one."
+  },
+
+  "unlocks": {
+    "1": ["income", "trade", "localIssue", "spendingLines", "yearEnd"],
+    "2": ["economicSystem"],
+    "3": ["taxRate"],
+    "4": ["investmentProjects", "borrowReason"],
+    "5": ["indicatorCompare"],
+    "6": []
+  },
+
+  "parties": [
+    {
+      "id": "cornerstone", "shortName": "Cornerstone", "fullName": "Cornerstone Party",
+      "identity": "Keep taxes low, keep government small, and build on what already works.",
+      "ideology": "Conservative: values individual responsibility, limited government, gradual change and respect for tradition and institutions.",
+      "spectrum": 2, "leftRight": "centre-right",
+      "planks": [
+        { "id": "c-low-tax", "title": "Lower taxes for everyone", "text": "You keep more of what you earn. Families and businesses decide how to spend it.", "appeal": { "workers": 2, "families": 1, "businesses": 4, "seniors": 1 }, "addresses": ["growth", "cost"], "budgetLevers": { "tax": 2 } },
+        { "id": "c-balance", "title": "Balance the budget", "text": "No new debt. We will not leave a bill for your kids.", "appeal": { "workers": 0, "families": 0, "businesses": 3, "seniors": 2 }, "addresses": ["debt"], "budgetLevers": { "maxDeficit": 0 } },
+        { "id": "c-provinces", "title": "Provinces know best", "text": "Provinces run health and schools their own way. Federal money comes with no strings attached.", "appeal": { "workers": 1, "families": 0, "businesses": 1, "seniors": 1 }, "provinceAppeal": { "ridgeland": 2, "valcourt": 2, "westhaven": 1 }, "addresses": ["regional"], "budgetLevers": { "health": 3 } },
+        { "id": "c-business", "title": "Build with business", "text": "Private partners help build the new bridge and pay part of the cost with tolls. A growth credit helps businesses hire.", "appeal": { "workers": 1, "families": 0, "businesses": 3, "seniors": 0 }, "provinceAppeal": { "lakemoor": 1 }, "addresses": ["growth", "unemployment"], "budgetLevers": { "bridge": "partnership", "infrastructure": 3 } }
+      ]
+    },
+    {
+      "id": "forward", "shortName": "Forward", "fullName": "Forward Party",
+      "identity": "Fair chances for everyone, with a government that steps in to help and keeps the books in check.",
+      "ideology": "Centre-left liberal: values reform, equal opportunity, an active government and a mixed economy.",
+      "spectrum": 3, "leftRight": "centre-left",
+      "planks": [
+        { "id": "f-health", "title": "Health care you can count on", "text": "A bigger health transfer to every province so waits get shorter.", "appeal": { "workers": 1, "families": 2, "businesses": 0, "seniors": 3 }, "addresses": ["health"], "budgetLevers": { "health": 4 } },
+        { "id": "f-skills", "title": "Skills for good jobs", "text": "A national fund for training and college so people can get the jobs of the future.", "appeal": { "workers": 3, "families": 2, "businesses": 1, "seniors": 0 }, "addresses": ["unemployment", "growth"], "budgetLevers": { "education": 4 } },
+        { "id": "f-steady", "title": "Fair, steady taxes", "text": "A middle tax rate. A small deficit is fine for investments, then we balance.", "appeal": { "workers": 1, "families": 1, "businesses": 1, "seniors": 1 }, "addresses": ["debt", "cost"], "budgetLevers": { "tax": 3 } },
+        { "id": "f-bridge", "title": "Rebuild the bridge now", "text": "Borrow to rebuild the Great Narrows Bridge in two years. Trade moves again fast.", "appeal": { "workers": 2, "families": 0, "businesses": 2, "seniors": 0 }, "provinceAppeal": { "goldplain": 2, "lakemoor": 2 }, "addresses": ["bridge", "growth"], "budgetLevers": { "bridge": "fast", "infrastructure": 4 } }
+      ]
+    },
+    {
+      "id": "commongood", "shortName": "Common Good", "fullName": "Common Good Party",
+      "identity": "Working people first. Share the wealth so nobody gets left behind.",
+      "ideology": "Social democratic: values equality, strong public services and a larger role for government in the economy.",
+      "spectrum": 4, "leftRight": "left",
+      "planks": [
+        { "id": "g-seniors-families", "title": "Support for seniors and families", "text": "A bigger pension and a child benefit, paid every month.", "appeal": { "workers": 2, "families": 3, "businesses": 0, "seniors": 4 }, "addresses": ["cost", "health"], "budgetLevers": { "social": 5 } },
+        { "id": "g-school-food", "title": "Food for every student", "text": "A national school food program. No child learns on an empty stomach.", "appeal": { "workers": 1, "families": 4, "businesses": 0, "seniors": 1 }, "addresses": ["cost", "food"], "budgetLevers": { "education": 4 } },
+        { "id": "g-fair-tax", "title": "Big companies pay their share", "text": "Higher taxes on the largest companies and highest earners pay for services.", "appeal": { "workers": 4, "families": 2, "businesses": -3, "seniors": 1 }, "addresses": ["debt"], "budgetLevers": { "tax": 4 } },
+        { "id": "g-equalization", "title": "Share fairly across Borealis", "text": "Strong equalization so every province can offer good services.", "appeal": { "workers": 1, "families": 1, "businesses": 0, "seniors": 1 }, "provinceAppeal": { "saltmarch": 3, "northreach": 3, "goldplain": 2, "lakemoor": -1, "ridgeland": -1 }, "addresses": ["regional", "health"], "budgetLevers": { "equalization": true } }
+      ]
+    },
+    {
+      "id": "evergreen", "shortName": "Evergreen", "fullName": "Evergreen Party",
+      "identity": "Protect the land, water and air, and build an economy that lasts for our grandchildren.",
+      "ideology": "Green: values sustainability, local communities, long-term thinking and grassroots decision making.",
+      "spectrum": 3, "leftRight": "centre-left",
+      "planks": [
+        { "id": "e-clean-grid", "title": "A clean power grid", "text": "Connect the country's hydro, wind and solar power with one national grid.", "appeal": { "workers": 1, "families": 3, "businesses": 0, "seniors": 1 }, "provinceAppeal": { "valcourt": 2, "westhaven": 2, "ridgeland": -2 }, "addresses": ["energy", "growth"], "budgetLevers": { "infrastructure": 4, "program": "clean-grid" } },
+        { "id": "e-protect", "title": "Protect land, water and fish", "text": "Stronger rules for forests, lakes and fisheries so they last.", "appeal": { "workers": 0, "families": 3, "businesses": -2, "seniors": 3 }, "provinceAppeal": { "saltmarch": 1, "westhaven": 1, "northreach": -1 }, "addresses": ["food", "regional"], "budgetLevers": {} },
+        { "id": "e-future", "title": "Invest now for the future", "text": "Borrow for projects that pay back over many years, like clean energy and training.", "appeal": { "workers": 2, "families": 3, "businesses": 1, "seniors": -1 }, "addresses": ["growth", "unemployment"], "budgetLevers": { "maxDeficit": 20 } },
+        { "id": "e-local", "title": "Strong local communities", "text": "Support for local farms, small businesses and transit in towns and cities.", "appeal": { "workers": 1, "families": 2, "businesses": 2, "seniors": 1 }, "provinceAppeal": { "goldplain": 1, "saltmarch": 1 }, "addresses": ["cost", "regional"], "budgetLevers": { "program": "rural-connect" } }
+      ]
+    }
+  ],
+
+  "regionalPromises": [
+    { "id": "rp-westhaven", "province": "westhaven", "title": "Expand the Western Sea port", "bonus": 3 },
+    { "id": "rp-ridgeland", "province": "ridgeland", "title": "Stand up for energy jobs", "bonus": 3 },
+    { "id": "rp-goldplain", "province": "goldplain", "title": "Rural internet and roads", "bonus": 3 },
+    { "id": "rp-lakemoor", "province": "lakemoor", "title": "Transit for growing cities", "bonus": 3 },
+    { "id": "rp-valcourt", "province": "valcourt", "title": "Protect Valcourt's language and culture", "bonus": 3 },
+    { "id": "rp-saltmarch", "province": "saltmarch", "title": "Keep the shipyards working", "bonus": 3 },
+    { "id": "rp-northreach", "province": "northreach", "title": "Lower northern living costs", "bonus": 3 }
+  ],
+
+  "ridingTypes": {
+    "city": { "name": "City", "mix": { "workers": 0.35, "families": 0.25, "businesses": 0.25, "seniors": 0.15 } },
+    "suburb": { "name": "Suburb", "mix": { "workers": 0.25, "families": 0.40, "businesses": 0.20, "seniors": 0.15 } },
+    "town": { "name": "Town", "mix": { "workers": 0.30, "families": 0.25, "businesses": 0.20, "seniors": 0.25 } },
+    "rural": { "name": "Rural", "mix": { "workers": 0.25, "families": 0.25, "businesses": 0.30, "seniors": 0.20 } },
+    "coastal": { "name": "Coastal", "mix": { "workers": 0.25, "families": 0.20, "businesses": 0.15, "seniors": 0.40 } },
+    "resource": { "name": "Resource town", "mix": { "workers": 0.45, "families": 0.25, "businesses": 0.20, "seniors": 0.10 } }
+  },
+
+  "ridings": [
+    { "id": "lk-harbourfront", "province": "lakemoor", "name": "Lakemoor Harbourfront", "type": "city" },
+    { "id": "lk-centre", "province": "lakemoor", "name": "Lakemoor Centre", "type": "city" },
+    { "id": "lk-capital", "province": "lakemoor", "name": "Capital District", "type": "city" },
+    { "id": "lk-mills", "province": "lakemoor", "name": "Millbrook", "type": "city" },
+    { "id": "lk-port-elm", "province": "lakemoor", "name": "Port Elm", "type": "city" },
+    { "id": "lk-oakfield", "province": "lakemoor", "name": "Oakfield", "type": "suburb" },
+    { "id": "lk-greenway", "province": "lakemoor", "name": "Greenway", "type": "suburb" },
+    { "id": "lk-cedarhill", "province": "lakemoor", "name": "Cedar Hill", "type": "suburb" },
+    { "id": "lk-westlake", "province": "lakemoor", "name": "Westlake", "type": "suburb" },
+    { "id": "lk-riverton", "province": "lakemoor", "name": "Riverton", "type": "town" },
+    { "id": "lk-stonebridge", "province": "lakemoor", "name": "Stonebridge", "type": "town" },
+    { "id": "lk-orchard", "province": "lakemoor", "name": "Orchard Country", "type": "rural" },
+    { "id": "vc-centre", "province": "valcourt", "name": "Pontarel", "type": "city" },
+    { "id": "vc-lesiles", "province": "valcourt", "name": "Les Iles", "type": "city" },
+    { "id": "vc-bellerive", "province": "valcourt", "name": "Bellerive", "type": "suburb" },
+    { "id": "vc-montclair", "province": "valcourt", "name": "Montclair", "type": "suburb" },
+    { "id": "vc-barrage", "province": "valcourt", "name": "Barrage", "type": "town" },
+    { "id": "vc-saint-ambre", "province": "valcourt", "name": "Saint-Ambre", "type": "town" },
+    { "id": "vc-hautes-terres", "province": "valcourt", "name": "Hautes-Terres", "type": "rural" },
+    { "id": "wh-port", "province": "westhaven", "name": "Port Corran", "type": "city" },
+    { "id": "wh-cascade", "province": "westhaven", "name": "Cascade", "type": "city" },
+    { "id": "wh-fernvale", "province": "westhaven", "name": "Fernvale", "type": "suburb" },
+    { "id": "wh-islands", "province": "westhaven", "name": "Island Coast", "type": "coastal" },
+    { "id": "wh-timberline", "province": "westhaven", "name": "Timberline", "type": "resource" },
+    { "id": "rg-southgate", "province": "ridgeland", "name": "Southgate", "type": "city" },
+    { "id": "rg-northgate", "province": "ridgeland", "name": "Northgate", "type": "city" },
+    { "id": "rg-foothills", "province": "ridgeland", "name": "Foothills", "type": "rural" },
+    { "id": "rg-wellfield", "province": "ridgeland", "name": "Wellfield", "type": "resource" },
+    { "id": "gp-junction", "province": "goldplain", "name": "Prairie Junction", "type": "city" },
+    { "id": "gp-wheatland", "province": "goldplain", "name": "Wheatland", "type": "rural" },
+    { "id": "gp-potash", "province": "goldplain", "name": "Potash Hills", "type": "rural" },
+    { "id": "sm-harbour", "province": "saltmarch", "name": "Saltmarch Harbour", "type": "town" },
+    { "id": "sm-outports", "province": "saltmarch", "name": "The Outports", "type": "coastal" },
+    { "id": "nr-north", "province": "northreach", "name": "Northreach", "type": "resource" }
+  ],
+
+  "election": {
+    "seats": 34,
+    "majority": 18,
+    "baseAppeal": 10,
+    "rankWeight": [2, 1.5, 1, 0],
+    "platformSize": 3,
+    "regionalPromiseBonus": 3,
+    "issueMultiplier": 1.5,
+    "issuesPerProvince": 2,
+    "issueRules": [
+      { "issue": "debt", "when": "net debt above 60% of GDP" },
+      { "issue": "unemployment", "when": "unemployment 7% or more" },
+      { "issue": "cost", "when": "CPI rose 12 or more points since Year 1" },
+      { "issue": "health", "when": "healthcare at Standard or below for 3 or more years" },
+      { "issue": "food", "when": "food was short in 2 or more years" },
+      { "issue": "energy", "when": "energy was short in 2 or more years" },
+      { "issue": "growth", "when": "GDP grew less than 8% over Phase 1" },
+      { "issue": "bridge", "when": "province is Goldplain or Lakemoor" },
+      { "issue": "regional", "when": "province is Valcourt, Northreach or Saltmarch" }
+    ],
+    "issueFallbackOrder": ["growth", "cost", "health", "debt"],
+    "campaignActions": [
+      { "id": "door", "name": "Door knocking", "cost": 1, "effect": "+2 appeal in one riding", "membersOnly": false },
+      { "id": "flyers", "name": "Flyers", "cost": 1, "effect": "+1 appeal in two ridings in the same province", "membersOnly": false },
+      { "id": "phones", "name": "Phone calls", "cost": 1, "effect": "+1 appeal in any one riding", "membersOnly": false },
+      { "id": "rally", "name": "Rally", "cost": 2, "effect": "+1 appeal in every riding of one province", "membersOnly": true },
+      { "id": "gotv", "name": "Get out the vote", "cost": 0, "effect": "+3% turnout in your home riding. No party gets appeal. Anyone can do it.", "membersOnly": false }
+    ],
+    "campaignActionsPerParty": 12,
+    "maxAppealFromCampaignPerRiding": 4,
+    "leaderHomeBonus": 2,
+    "debateMomentum": { "endorsementRankBonus": [2, 1, 0, 0], "teacherReasoningBonusMax": 1 },
+    "studentVoteSwing": 0.5,
+    "fiscalCredibility": { "deficitAboveSharePct": 15, "penalty": { "businesses": -2, "seniors": -2 } },
+    "minAppeal": 1,
+    "turnoutBase": 62,
+    "turnoutPerGotv": 3,
+    "turnoutMax": 85,
+    "tieBreak": "Higher province-wide share wins. If still tied, the teacher flips a coin on the board."
+  },
+
+  "parliament": {
+    "house": { "seats": 34, "majority": 18 },
+    "senate": { "senators": 3, "appointedBy": "Governor General on the Prime Minister's recommendation", "canSendBack": 1 },
+    "governorGeneral": "The teacher. Invites the party most likely to win a confidence vote to form government, reads the Throne Speech, gives Royal Assent.",
+    "cabinetRoles": ["Prime Minister", "Finance", "Health", "Education", "Infrastructure", "Social Programs"],
+    "oppositionRoles": ["Leader of the Opposition", "Finance critic", "Health critic", "Education critic", "Infrastructure critic", "Social Programs critic"],
+    "confidence": "A minority government must win a vote on its Throne Speech. If it loses, the Governor General asks the next party. A government that loses a budget vote falls.",
+    "questionPeriod": { "minutes": 12, "questionsPerOppositionParty": 2, "answerSeconds": 60, "rubric": ["Claim", "Evidence from a dashboard number", "Trade-off named"] }
+  },
+
+  "federalBudget": {
+    "about": "Same structure as a province budget: a tax rate and the same four spending lines, plus the bridge and equalization. Costs in $B per year. Revenue is the tax rate times national GDP at the end of Year 6.",
+    "taxRates": [4, 6, 8, 10, 12],
+    "taxApproval": { "businesses": [2, 1, 0, -1.5, -3], "workers": [1, 0.5, 0, -1, -2], "families": [0.5, 0, 0, -0.5, -1], "seniors": [0.5, 0, 0, -0.5, -1] },
+    "taxGrowth": [0.5, 0.25, 0, -0.25, -0.5],
+    "lines": {
+      "health": { "name": "Health transfer", "cost": [0, 3, 5, 7, 9], "toProvinces": "byPopulation", "approval": { "seniors": [-3, -1.5, 0, 1, 2], "families": [-2, -1, 0, 0.5, 1] } },
+      "education": { "name": "Skills and school food", "cost": [0, 2, 3, 4, 5], "effects": { "skill": [-1, 0, 0, 1, 1], "families": [-2, -1, 0, 1, 2], "unemployment": [0.5, 0.25, 0, -0.5, -1] } },
+      "infrastructure": { "name": "National infrastructure", "cost": [0, 2, 4, 6, 8], "effects": { "infrastructure": [-1, 0, 0, 1, 2], "growth": [-0.5, -0.25, 0, 0.5, 1], "businesses": [-2, -1, 0, 1, 1.5] } },
+      "social": { "name": "Seniors and families benefit", "cost": [0, 2, 4, 6, 8], "effects": { "seniors": [-3, -1.5, 0, 2, 3], "families": [-1.5, -0.5, 0, 1, 2], "workers": [-1, -0.5, 0, 0.5, 1] } }
+    },
+    "bridge": {
+      "fast": { "name": "Borrow and rebuild in 2 years", "costPerYear": 30, "years": 2, "reopensYear": 8, "growthWhileBuilding": 0.5 },
+      "steady": { "name": "Pay from taxes over 5 years", "costPerYear": 12, "years": 5, "reopensYear": 10 },
+      "partnership": { "name": "Private partner builds, users pay tolls", "costPerYear": 8, "years": 4, "reopensYear": 9, "tollTradeFee": 5, "approval": { "businesses": -1 } },
+      "none": { "name": "Do not rebuild yet", "costPerYear": 0, "approval": { "all": -2 }, "regionalApproval": { "goldplain": -3, "lakemoor": -3 } }
+    },
+    "equalization": { "pool": 6, "rule": "Paid to provinces whose revenue at a 30% tax rate is below the cost of Standard spending. Split by the size of the gap." },
+    "programs": {
+      "clean-grid": { "name": "Clean power grid", "cost": 4, "effects": [ { "type": "baseProduction", "resource": "energy", "amount": 2, "target": ["valcourt", "westhaven", "lakemoor"] }, { "type": "approval", "group": "workers", "amount": -1, "target": "ridgeland" } ] },
+      "rural-connect": { "name": "Rural and northern connection", "cost": 3, "effects": [ { "type": "growth", "amount": 1, "target": ["goldplain", "saltmarch", "northreach"] }, { "type": "approval", "group": "families", "amount": 1, "target": ["goldplain", "saltmarch", "northreach"] } ] }
+    },
+    "interestRate": 5,
+    "startingDebt": 0,
+    "defaults": { "tax": 3, "health": 3, "education": 3, "infrastructure": 3, "social": 3, "bridge": "steady", "equalization": false },
+    "about_levels": "Same 1 to 5 levels as a province. Level 3 is Standard. At Standard with the steady bridge, the budget is close to balanced when national GDP is about $400B.",
+    "year7": "After Royal Assent the board runs one fast fiscal year. Each province keeps its Year 6 budget. Transfers arrive as Money. Federal effects apply. Board shows each province's approval change and why."
+  },
+
+  "bills": [
+    {
+      "id": "c-1-budget", "number": "C-1", "title": "Borealis Founding Budget Act", "required": true,
+      "drafter": "Cabinet (Finance Minister leads)",
+      "text": "Sets the federal tax rate, the four national spending lines, the bridge plan and equalization for the first federal year.",
+      "startsFrom": "The governing party's platform levers.",
+      "amendments": "Each opposition party may propose one amendment (change one lever by one level). The House votes on each.",
+      "confidence": true,
+      "stages": ["Cabinet drafts", "First reading (title read)", "Debate and Question Period", "Amendments", "House vote", "Senate review", "Royal Assent"]
+    },
+    {
+      "id": "c-2-bridge", "number": "C-2", "title": "Great Narrows Bridge Act", "required": false,
+      "drafter": "Minister of Infrastructure",
+      "text": "Chooses how to rebuild the bridge: borrow and build fast, pay over 4 years, or a private partner with tolls. Use it as a 10-minute warm-up bill before C-1, or fold it into C-1 as the bridge lever.",
+      "options": ["fast", "steady", "partnership", "none"],
+      "confidence": false,
+      "stages": ["First reading", "Debate (2 speakers per party)", "House vote", "Senate review", "Royal Assent"]
+    },
+    {
+      "id": "c-3-open-trade", "number": "C-3", "title": "Open Trade Act", "required": false, "grade9": true,
+      "drafter": "Any party (private member's bill)",
+      "text": "Removes the paperwork fee on trade between provinces. Links to the whiteboard's free trade step. Grade 9 content: used, not assessed.",
+      "effects": [ { "type": "tradeFee", "pct": -10, "routes": "all", "years": 99 }, { "type": "approval", "group": "businesses", "amount": 1, "target": "all" }, { "type": "approval", "group": "workers", "amount": -1, "target": ["goldplain", "saltmarch"] } ],
+      "confidence": false,
+      "stages": ["First reading", "Debate", "House vote", "Senate review", "Royal Assent"]
+    }
+  ],
+
+  "scoring": {
+    "provinceScore": "Approval rating. Shown live. Never a single ranked winner.",
+    "reasoningPoints": {
+      "when": "Every year, the Citizens' Advocate reads a 1 or 2 sentence Budget Speech. The teacher awards 0 to 3.",
+      "rubric": [
+        { "points": 1, "text": "Says what you chose." },
+        { "points": 2, "text": "Says what you chose and why, using one number from your dashboard." },
+        { "points": 3, "text": "Says what you chose, why with a number, and who pays or loses (the trade-off)." }
+      ],
+      "effect": "Each point adds 0.5 approval to every citizen group that year (constants.reasoningApprovalPerPoint). In the story, a clear explanation earns public trust."
+    },
+    "awards": [
+      { "id": "trust", "name": "Most Trusted", "rule": "Highest approval at the end of Year 6." },
+      { "id": "comeback", "name": "Comeback", "rule": "Biggest approval gain from the lowest point in Phase 1 to the end of Year 6." },
+      { "id": "speech", "name": "Best Explained", "rule": "Most reasoning points in Phase 1." },
+      { "id": "dealmaker", "name": "Fair Dealer", "rule": "Most trades completed inside the fair price band." },
+      { "id": "steward", "name": "Steady Hands", "rule": "Smallest rise in debt compared with GDP, with approval above 45." },
+      { "id": "question", "name": "Sharpest Question", "rule": "Highest Question Period rubric score (Phase 2)." }
+    ],
+    "classGoal": { "name": "Strong Borealis", "rule": "If the national average approval is 55 or more at the end of Year 6, the new federal government starts with $10B in the bank (Phase 2).", "bonusMoney": 10 },
+    "phase2": "No winning party. Seats decide who governs, not who wins the unit. Reasoning points from Question Period and debate count the same as in Phase 1."
+  },
+
+  "periods": [
+    { "period": 1, "name": "Launch", "steps": [ { "step": "Board tour and province profiles", "minutes": 10 }, { "step": "Year 0 practice round (no score)", "minutes": 12 } ] },
+    { "period": 2, "name": "Year 1", "fiscalYear": 1, "steps": [ { "step": "Headline", "minutes": 2 }, { "step": "Income", "minutes": 3 }, { "step": "Trade", "minutes": 8 }, { "step": "Local issue", "minutes": 6 }, { "step": "Budget", "minutes": 8 }, { "step": "Year-end results", "minutes": 3 } ] },
+    { "period": 3, "name": "Year 2", "fiscalYear": 2, "steps": [ { "step": "Headline", "minutes": 2 }, { "step": "Income", "minutes": 2 }, { "step": "Trade", "minutes": 7 }, { "step": "Local issue", "minutes": 5 }, { "step": "Budget and economic system", "minutes": 7 }, { "step": "Year-end results", "minutes": 2 } ] },
+    { "period": 4, "name": "Year 3", "fiscalYear": 3, "steps": [ { "step": "Headline", "minutes": 2 }, { "step": "Income", "minutes": 2 }, { "step": "Trade", "minutes": 8 }, { "step": "Local issue", "minutes": 5 }, { "step": "Budget", "minutes": 8 }, { "step": "Year-end results", "minutes": 3 } ] },
+    { "period": 5, "name": "Year 4", "fiscalYear": 4, "steps": [ { "step": "Headline", "minutes": 2 }, { "step": "Income", "minutes": 2 }, { "step": "Trade", "minutes": 8 }, { "step": "Local issue", "minutes": 5 }, { "step": "Budget", "minutes": 8 }, { "step": "Year-end results", "minutes": 3 } ] },
+    { "period": 6, "name": "Year 5", "fiscalYear": 5, "steps": [ { "step": "Headline", "minutes": 2 }, { "step": "Income", "minutes": 2 }, { "step": "Trade", "minutes": 8 }, { "step": "Local issue", "minutes": 5 }, { "step": "Budget", "minutes": 8 }, { "step": "Year-end results", "minutes": 3 } ] },
+    { "period": 7, "name": "Year 6", "fiscalYear": 6, "steps": [ { "step": "Headline", "minutes": 2 }, { "step": "Income", "minutes": 2 }, { "step": "Trade", "minutes": 8 }, { "step": "Local issue", "minutes": 5 }, { "step": "Budget", "minutes": 8 }, { "step": "Year-end results", "minutes": 3 } ] },
+    { "period": 8, "name": "Phase 1 review", "steps": [ { "step": "State of the Province reports", "minutes": 20 } ] },
+    { "period": 9, "name": "Bridge crisis", "steps": [ { "step": "Bridge falls (headline)", "minutes": 3 }, { "step": "Pledge round 1 (secret)", "minutes": 4 }, { "step": "Pledge round 2 (open)", "minutes": 6 } ] },
+    { "period": 10, "name": "Parties", "steps": [ { "step": "Party cards and secret choice slip", "minutes": 8 }, { "step": "Caucus: leader vote and priority ranking", "minutes": 20 } ] },
+    { "period": 11, "name": "Platforms and ridings", "steps": [ { "step": "Platform levers and regional promise", "minutes": 18 }, { "step": "Riding association: candidates", "minutes": 12 } ] },
+    { "period": 12, "name": "Campaign", "steps": [ { "step": "Campaign actions", "minutes": 15 }, { "step": "All-candidates debate and endorsements", "minutes": 15 } ] },
+    { "period": 13, "name": "Election and government", "steps": [ { "step": "Student Vote", "minutes": 12 }, { "step": "Results riding by riding", "minutes": 8 }, { "step": "Throne Speech and confidence (minority only)", "minutes": 5 }, { "step": "Cabinet, shadow cabinet, senators", "minutes": 10 } ] },
+    { "period": 14, "name": "Parliament", "steps": [ { "step": "Cabinet drafts C-1", "minutes": 15 }, { "step": "Question Period", "minutes": 12 } ] },
+    { "period": 15, "name": "Budget vote", "steps": [ { "step": "Debate and amendments", "minutes": 15 }, { "step": "House vote, class vote, Senate, Royal Assent", "minutes": 7 }, { "step": "Year 7 resolves", "minutes": 5 } ] },
+    { "period": 16, "name": "Debrief", "steps": [ { "step": "History log replay", "minutes": 5 } ] }
+  ]
+}

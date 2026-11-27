@@ -1,0 +1,20 @@
+/* Printable history log. */
+body.log { background: #fff; }
+.logbar { display: flex; gap: 8px; padding: 12px; background: var(--paper); border-bottom: 1px solid var(--ink); align-items: center; }
+.logbar select { font: inherit; min-height: 48px; border: var(--border-ink); border-radius: var(--radius-md); }
+#log { max-width: 1100px; margin: 0 auto; padding: 16px; }
+.log-head { border-bottom: 3px double var(--ink); margin-bottom: 16px; }
+.log-head h1 { font-size: 2.2rem; letter-spacing: .1em; }
+.prov, .nat { margin-bottom: 24px; }
+.prov h2 { display: flex; align-items: center; gap: 8px; letter-spacing: .1em; text-transform: uppercase; }
+.prov table { font-size: 12px; margin-bottom: 8px; }
+.prov th, .prov td { border: 1px solid var(--rule); padding: 2px 4px; text-align: left; }
+.events { font-size: 13px; columns: 2; column-gap: 24px; padding-left: 18px; }
+.events li, .nat li { break-inside: avoid; margin-bottom: 2px; }
+.nat ul { font-size: 13px; }
+@media print {
+  .noprint { display: none !important; }
+  .prov { break-before: page; }
+  body { font-size: 11pt; }
+  @page { margin: 14mm; }
+}

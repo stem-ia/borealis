@@ -1,0 +1,12 @@
+National GDP after Year 6 (flexible run): $415B
+Province issues: {'westhaven': ['health', 'growth'], 'ridgeland': ['growth', 'cost'], 'goldplain': ['energy', 'growth'], 'lakemoor': ['health', 'bridge'], 'valcourt': ['health', 'regional'], 'saltmarch': ['health', 'regional'], 'northreach': ['health', 'energy']}
+
+| Party | Avg seats | Most seats (share of elections) | Shut out (0 seats) | Platform within credibility line |
+| --- | --- | --- | --- | --- |
+| Cornerstone | 9.3 | 28% | 2% | 100% |
+| Forward | 9.0 | 34% | 5% | 26% |
+| Common Good | 7.4 | 19% | 1% | 74% |
+| Evergreen | 8.2 | 19% | 2% | 100% |
+
+Majority governments: 31% of elections. Minority: 69%.
+Average gap between a party's seat share and vote share: 12.7 points (first past the post distortion).

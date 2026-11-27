@@ -1,0 +1,159 @@
+/* Borealis design tokens
+   One file for the board (teacher map) and the group dashboards.
+   Checked with map/tools/check_colours.py (WCAG contrast + colour-blind simulation).
+   Fonts: Crimson Text (display, map labels) and Source Sans 3 (UI, numbers).
+   Both are SIL Open Font License. Self-host them (see visual-system.md), so student
+   devices make no requests to third-party font servers. */
+
+/* Self-hosted fonts (Latin subset, WOFF2, about 180 KB total). Paths are relative to this file. */
+@font-face { font-family: 'Crimson Text'; src: url('../fonts/CrimsonText-Regular.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Crimson Text'; src: url('../fonts/CrimsonText-Italic.woff2') format('woff2'); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Crimson Text'; src: url('../fonts/CrimsonText-SemiBold.woff2') format('woff2'); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Crimson Text'; src: url('../fonts/CrimsonText-Bold.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Source Sans 3'; src: url('../fonts/SourceSans3-VF.woff2') format('woff2'); font-weight: 200 900; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Source Sans 3'; src: url('../fonts/SourceSans3-Italic-VF.woff2') format('woff2'); font-weight: 200 900; font-style: italic; font-display: swap; }
+
+:root {
+  /* ---------- paper and ink ---------- */
+  --paper: #F4ECD8;          /* page and board background, parchment */
+  --paper-raised: #FBF7EC;   /* cards, panels, dashboard surfaces */
+  --paper-sunk: #E9DFC7;     /* wells, inactive tabs, table stripes */
+  --rule: #CBBFA4;           /* hairlines and dividers (decorative, not text) */
+  --ink: #2B2520;            /* body text, coastlines, borders */
+  --ink-soft: #5B5045;       /* secondary text */
+  --ink-faint: #8C857A;      /* disabled, decorative only, never body text */
+
+  /* ---------- water and land ---------- */
+  --sea: #D3E3E1;
+  --sea-line: #8DB1B3;       /* water lining around coasts */
+  --sea-ink: #3C6670;        /* sea names */
+  --lake: #C3DCDD;
+  --river: #4D86A0;
+  --neighbour: #DEDAD0;      /* The Southern Republic, greyed out */
+  --neighbour-ink: #8C857A;
+  --terrain-ink: #3A3128;    /* hachures, tree and tundra stipple */
+  --ice: #F7F8F6;
+
+  /* ---------- provinces ----------
+     -fill:   map tint (ink text sits on it at 7:1 or better)
+     -strong: chips, borders, text on paper (4.5:1 or better on --paper)  */
+  --prov-westhaven: #8FD0B2;        --prov-westhaven-strong: #005235;
+  --prov-ridgeland: #EDA77F;        --prov-ridgeland-strong: #975228;
+  --prov-goldplain: #ECD47D;        --prov-goldplain-strong: #644D00;
+  --prov-lakemoor: #D593A9;         --prov-lakemoor-strong: #954E69;
+  --prov-valcourt: #AE9FD6;         --prov-valcourt-strong: #614D91;
+  --prov-saltmarch: #73C5C3;        --prov-saltmarch-strong: #00706F;
+  --prov-northreach: #E4E6F2;       --prov-northreach-strong: #2C3447;
+  /* Strong colours sit at staggered lightness so they stay apart under colour blindness. */
+
+  /* ---------- resources (icon + word always; colour is a second cue) ---------- */
+  --res-energy: #B8740A;     --res-energy-tint: #F6DFB2;     /* icons/energy.svg */
+  --res-food: #3E6B1F;        --res-food-tint: #D8E8C4;       /* icons/food.svg */
+  --res-materials: #5F6874;  --res-materials-tint: #DDE1E6;  /* icons/materials.svg */
+  --res-money: #2B66A3;      --res-money-tint: #D3E2F2;      /* icons/money.svg */
+
+  /* ---------- federal parties (Phase 2) ----------
+     No red, blue, orange or green, so no party maps 1:1 to a real one.
+     Always pair with the party name and a hatch pattern (#bm-hatch-1..4 in the map). */
+  --party-1: #5B3C8C;  --party-1-tint: #BBA8D8;  --party-1-on: #FFFFFF;  --party-1-ink: #5B3C8C;  /* Plum */
+  --party-2: #D6A21E;  --party-2-tint: #EBD08A;  --party-2-on: #2B2520;  --party-2-ink: #74560A;  /* Saffron */
+  --party-3: #13727A;  --party-3-tint: #86C6C6;  --party-3-on: #FFFFFF;  --party-3-ink: #13727A;  /* Teal */
+  --party-4: #7A4A2A;  --party-4-tint: #D3AC8E;  --party-4-on: #FFFFFF;  --party-4-ink: #7A4A2A;  /* Umber */
+  /* -on: text on the party colour. -ink: party-coloured text on paper. -tint: riding fill on the map. */
+  --party-none: #B8B1A4;                                                 /* uncalled riding */
+
+  /* ---------- status ---------- */
+  --status-good: #2E7246;  --status-good-tint: #D5EBDC;
+  --status-warn: #8F5A05;  --status-warn-tint: #F7E3BC;
+  --status-bad: #9E2B22;   --status-bad-tint: #F5D6D1;
+  --focus: #1F5FBF;        /* focus ring, 3px, offset 2px */
+
+  /* ---------- type ---------- */
+  --font-display: 'Crimson Text', 'Crimson Pro', Georgia, 'Times New Roman', serif;
+  --font-ui: 'Source Sans 3', 'Source Sans Pro', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  --font-num: var(--font-ui); /* use with font-variant-numeric: tabular-nums */
+
+  /* Modular scale 1.25. Set the root size per surface:
+     dashboards html { font-size: 100% } (16px)
+     board      html { font-size: 150% } (24px, readable from the back of the room) */
+  --fs-xs: 0.8rem;
+  --fs-sm: 0.9rem;
+  --fs-base: 1rem;
+  --fs-md: 1.25rem;
+  --fs-lg: 1.563rem;
+  --fs-xl: 1.953rem;
+  --fs-2xl: 2.441rem;
+  --fs-3xl: 3.052rem;
+  --lh-tight: 1.15;
+  --lh-body: 1.45;
+  --tracking-caps: 0.18em;   /* spaced small caps for province names and headings */
+
+  /* ---------- space, shape, depth ---------- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+  --border-hair: 1px solid var(--rule);
+  --border-ink: 1.5px solid var(--ink);
+  --shadow-card: 0 1px 0 rgba(43, 37, 32, .08), 0 2px 8px rgba(43, 37, 32, .10);
+  --tap-min: 48px;           /* minimum touch target on board and phones */
+
+  /* ---------- motion ---------- */
+  --ease: cubic-bezier(.2, .7, .2, 1);
+  --dur-fast: 150ms;
+  --dur-base: 300ms;
+  --dur-slow: 700ms;
+  --dur-route: 1800ms;       /* one trade-route dash cycle */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur-base: 0ms;
+    --dur-slow: 0ms;
+    --dur-route: 0ms;
+  }
+}
+
+/* ---------- map hooks (the SVG is inlined into the board and dashboards) ---------- */
+#prov-westhaven { fill: var(--prov-westhaven); }
+#prov-ridgeland { fill: var(--prov-ridgeland); }
+#prov-goldplain { fill: var(--prov-goldplain); }
+#prov-lakemoor { fill: var(--prov-lakemoor); }
+#prov-valcourt { fill: var(--prov-valcourt); }
+#prov-saltmarch { fill: var(--prov-saltmarch); }
+#prov-northreach { fill: var(--prov-northreach); }
+
+/* Party aliases: game-data.json party ids to colour slots.
+   Colours are deliberately scrambled against real-world associations. */
+:root {
+  --party-cornerstone: var(--party-2);  --party-cornerstone-tint: var(--party-2-tint);  /* Saffron, hatch 2 (dots) */
+  --party-forward: var(--party-3);      --party-forward-tint: var(--party-3-tint);      /* Teal, hatch 3 (cross) */
+  --party-commongood: var(--party-1);   --party-commongood-tint: var(--party-1-tint);   /* Plum, hatch 1 (diagonal) */
+  --party-evergreen: var(--party-4);    --party-evergreen-tint: var(--party-4-tint);    /* Umber, hatch 4 (lines) */
+}
+
+/* ---------- map states (see visual-system.md) ---------- */
+.borealis-map .bm-prov { transition: fill var(--dur-slow) var(--ease), fill-opacity var(--dur-base) var(--ease); }
+.borealis-map.has-selection .bm-prov:not(.is-selected) { fill-opacity: .55; }
+.borealis-map .bm-prov.is-pressed { fill-opacity: .8; }
+/* selection outline: the app clones the province into #overlay as <use class="bm-select-halo"> and <use class="bm-select"> */
+.borealis-map .bm-select-halo { fill: none; stroke: var(--paper); stroke-width: 9; stroke-linejoin: round; }
+.borealis-map .bm-select { fill: none; stroke: var(--ink); stroke-width: 4; stroke-linejoin: round; }
+.borealis-map .bm-alert-ring { fill: none; stroke: var(--status-bad); stroke-width: 4; stroke-linejoin: round; stroke-dasharray: 10 6; }
+/* trade route: <path class="bm-route" style="--route: var(--res-food)"> between two anchors */
+.borealis-map .bm-route { fill: none; stroke: var(--route, var(--ink)); stroke-width: 5; stroke-linecap: round; stroke-dasharray: 2 12; animation: bm-route var(--dur-route) linear infinite; }
+.borealis-map .bm-route.is-pending { stroke: var(--ink-faint); animation: none; }
+.borealis-map .bm-route-halo { fill: none; stroke: var(--paper); stroke-width: 9; stroke-linecap: round; opacity: .8; }
+@keyframes bm-route { to { stroke-dashoffset: -28; } }
+@media (prefers-reduced-motion: reduce) { .borealis-map .bm-route { animation: none; stroke-dasharray: none; } }
+/* thumbnail mode for phones: keep shapes and province names, drop detail */
+.borealis-map.bm-thumb #terrain, .borealis-map.bm-thumb #graticule, .borealis-map.bm-thumb #labels-features,
+.borealis-map.bm-thumb #labels-seas, .borealis-map.bm-thumb .bm-city-name, .borealis-map.bm-thumb .bm-fed-sub,
+.borealis-map.bm-thumb #decoration, .borealis-map.bm-thumb #neighbour text { display: none; }

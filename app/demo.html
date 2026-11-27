@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Borealis demo</title>
+<style>
+/* VOICE: plain demo wrapper; the app is the picture
+   IDEA: a classroom seen from the side: board on the wall, a phone in hand
+   PICTURE: the live board at 1920x1080, scaled, with one group phone beside it
+   COLOUR and TYPE: the app's own parchment and ink; Source Sans 3
+   LAYOUT: board left, phone right; stacked under 900px */
+@font-face{font-family:"Source Sans 3";src:url(fonts/SourceSans3-VF.woff2) format("woff2");font-weight:200 900}
+:root{color-scheme:light;--bg:#efe7d6;--ink:#2a2420;--line:#cbbd9f}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Source Sans 3",system-ui,sans-serif;overflow-x:clip}
+header{padding:14px max(3vw,14px) 6px;display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline}
+h1{font-size:22px;margin:0;letter-spacing:.02em}
+header p{margin:0;font-size:15px;max-width:78ch}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px;padding:8px max(3vw,14px) 18px;align-items:start}
+.frame{position:relative;width:100%;border:1px solid var(--line);background:#fff;overflow:hidden;border-radius:6px}
+.frame iframe{position:absolute;top:0;left:0;border:0;transform-origin:0 0}
+#board{width:1920px;height:1080px}#phone{width:390px;height:844px}
+.board{aspect-ratio:16/9}
+.phone{aspect-ratio:390/844;border-radius:22px;border:6px solid #2a2420}
+.side label{display:block;font-size:14px;margin:0 0 6px}
+select{width:100%;font:inherit;font-size:16px;padding:8px;min-height:44px;border:1px solid var(--line);border-radius:6px;background:#fffaf0;color:var(--ink);margin-bottom:10px}
+.note{font-size:14px;margin:10px 0 0}
+@media(max-width:900px){.wrap{grid-template-columns:minmax(0,1fr)}.side{max-width:320px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Borealis: prototype demo</h1>
+  <p>Left is the teacher board as it looks on the touch screen. Right is one group's phone. Both run live in this window and stay in sync. Pick a province or party to see its dashboard.</p>
+</header>
+<div class="wrap">
+  <div class="frame board" id="bf"><iframe id="board" src="board.html" width="1920" height="1080" title="Teacher board"></iframe></div>
+  <div class="side">
+    <label for="who">Group device shows</label>
+    <select id="who"></select>
+    <div class="frame phone" id="pf"><iframe id="phone" width="390" height="844" title="Group dashboard"></iframe></div>
+    <p class="note" id="status">Waiting for the board to start a class…</p>
+  </div>
+</div>
+<script>
+{
+const P=[["westhaven","Westhaven"],["ridgeland","Ridgeland"],["goldplain","Goldplain"],["lakemoor","Lakemoor"],["valcourt","Valcourt"],["saltmarch","Saltmarch"],["northreach","Northreach"]];
+const who=document.getElementById("who"),board=document.getElementById("board"),phone=document.getElementById("phone"),status=document.getElementById("status");
+who.innerHTML=P.map(([id,n])=>`<option value="province:${id}">${n}</option>`).join("")+'<optgroup label="Phase 2 party caucus"><option value="party:cornerstone">Cornerstone</option><option value="party:forward">Forward</option><option value="party:commongood">Common Good</option><option value="party:evergreen">Evergreen</option></optgroup>';
+let room="";
+function fit(){
+  const bf=document.getElementById("bf"),pf=document.getElementById("pf");
+  board.style.transform=`scale(${bf.clientWidth/1920})`;
+  phone.style.transform=`scale(${pf.clientWidth/390})`;
+}
+new ResizeObserver(fit).observe(document.body);fit();
+function load(){if(room)phone.src=`group.html?room=${encodeURIComponent(room)}&demo=1&as=${who.value}`;}
+who.addEventListener("change",load);
+const poll=setInterval(()=>{
+  try{
+    const el=board.contentDocument&&board.contentDocument.querySelector(".room b, .code");
+    const r=el&&el.textContent.trim();
+    if(r&&r!==room){room=r;status.textContent="Class room "+room+". The phone is joined.";load();}
+  }catch(e){status.textContent="This viewer blocks the live link. Open board.html and group.html in two tabs instead.";clearInterval(poll);}
+},800);
+}
+</script>
+</body>
+</html>

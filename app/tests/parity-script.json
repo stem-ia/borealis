@@ -1,0 +1,1241 @@
+{
+ "seed": 7,
+ "years": [
+  {
+   "event": null,
+   "choices": [
+    [
+     "westhaven",
+     "gen-arena",
+     "pay",
+     false
+    ],
+    [
+     "ridgeland",
+     "gen-tech-company",
+     "no",
+     false
+    ],
+    [
+     "goldplain",
+     "gen-hospital-waits",
+     "private",
+     false
+    ],
+    [
+     "lakemoor",
+     "gen-hospital-waits",
+     "hire",
+     false
+    ],
+    [
+     "valcourt",
+     "gen-power-plant",
+     "rebuild",
+     false
+    ],
+    [
+     "saltmarch",
+     "gen-tech-company",
+     "yes",
+     false
+    ],
+    [
+     "northreach",
+     "gen-teachers",
+     "raise",
+     false
+    ]
+   ],
+   "deals": [
+    [
+     "goldplain",
+     "lakemoor",
+     {
+      "food": 4
+     },
+     {
+      "money": 3.5
+     }
+    ],
+    [
+     "ridgeland",
+     "goldplain",
+     {
+      "energy": 3
+     },
+     {
+      "food": 3
+     }
+    ],
+    [
+     "northreach",
+     "westhaven",
+     {
+      "materials": 3
+     },
+     {
+      "food": 1,
+      "money": 1
+     }
+    ]
+   ],
+   "market": true,
+   "budgets": {
+    "westhaven": {
+     "tax": 3,
+     "health": 3,
+     "education": 3,
+     "infrastructure": 3,
+     "social": 4,
+     "system": null,
+     "policy": "buy",
+     "reasoning": 3,
+     "project": null,
+     "planner": []
+    },
+    "ridgeland": {
+     "tax": 3,
+     "health": 4,
+     "education": 3,
+     "infrastructure": 4,
+     "social": 4,
+     "system": null,
+     "policy": "buy",
+     "reasoning": 1,
+     "project": null,
+     "planner": []
+    },
+    "goldplain": {
+     "tax": 3,
+     "health": 4,
+     "education": 3,
+     "infrastructure": 3,
+     "social": 2,
+     "system": null,
+     "policy": "buy",
+     "reasoning": 3,
+     "project": null,
+     "planner": []
+    },
+    "lakemoor": {
+     "tax": 3,
+     "health": 3,
+     "education": 3,
+     "infrastructure": 3,
+     "social": 3,
+     "system": null,
+     "policy": "buy",
+     "reasoning": 1,
+     "project": null,
+     "planner": []
+    },
+    "valcourt": {
+     "tax": 3,
+     "health": 2,
+     "education": 2,
+     "infrastructure": 3,
+     "social": 4,
+     "system": null,
+     "policy": "buy",
+     "reasoning": 3,
+     "project": null,
+     "planner": []
+    },
+    "saltmarch": {
+     "tax": 3,
+     "health": 3,
+     "education": 3,
+     "infrastructure": 4,
+     "social": 3,
+     "system": null,
+     "policy": "buy",
+     "reasoning": 2,
+     "project": null,
+     "planner": []
+    },
+    "northreach": {
+     "tax": 3,
+     "health": 4,
+     "education": 3,
+     "infrastructure": 3,
+     "social": 3,
+     "system": null,
+     "policy": "buy",
+     "reasoning": 3,
+     "project": null,
+     "planner": []
+    }
+   }
+  },
+  {
+   "event": "tech-boom",
+   "choices": [
+    [
+     "westhaven",
+     "westhaven-port",
+     "no",
+     false
+    ],
+    [
+     "westhaven",
+     "tech-boom",
+     "protect",
+     true
+    ],
+    [
+     "ridgeland",
+     "ridgeland-pipeline",
+     "yes",
+     false
+    ],
+    [
+     "ridgeland",
+     "tech-boom",
+     "protect",
+     true
+    ],
+    [
+     "goldplain",
+     "goldplain-mine",
+     "lowtax",
+     false
+    ],
+    [
+     "goldplain",
+     "tech-boom",
+     "attract",
+     true
+    ],
+    [
+     "lakemoor",
+     "lakemoor-robots",
+     "allow",
+     false
+    ],
+    [
+     "lakemoor",
+     "tech-boom",
+     "protect",
+     true
+    ],
+    [
+     "valcourt",
+     "valcourt-hydro",
+     "factories",
+     false
+    ],
+    [
+     "valcourt",
+     "tech-boom",
+     "train",
+     true
+    ],
+    [
+     "saltmarch",
+     "saltmarch-fishing-custom",
+     "keep-custom",
+     false
+    ],
+    [
+     "saltmarch",
+     "tech-boom",
+     "attract",
+     true
+    ],
+    [
+     "northreach",
+     "northreach-mine",
+     "study",
+     false
+    ],
+    [
+     "northreach",
+     "tech-boom",
+     "attract",
+     true
+    ]
+   ],
+   "deals": [
+    [
+     "goldplain",
+     "lakemoor",
+     {
+      "food": 4
+     },
+     {
+      "money": 3.5
+     }
+    ],
+    [
+     "ridgeland",
+     "goldplain",
+     {
+      "energy": 3
+     },
+     {
+      "food": 3
+     }
+    ],
+    [
+     "northreach",
+     "westhaven",
+     {
+      "materials": 3
+     },
+     {
+      "food": 1,
+      "money": 1
+     }
+    ]
+   ],
+   "market": false,
+   "budgets": {
+    "westhaven": {
+     "tax": 3,
+     "health": 3,
+     "education": 3,
+     "infrastructure": 3,
+     "social": 3,
+     "system": "down",
+     "policy": "buy",
+     "reasoning": 3,
+     "project": null,
+     "planner": []
+    },
+    "ridgeland": {
+     "tax": 3,
+     "health": 3,
+     "education": 3,
+     "infrastructure": 3,
+     "social": 3,
+     "system": "stay",
+     "policy": "buy",
+     "reasoning": 0,
+     "project": null,
+     "planner": []
+    },
+    "goldplain": {
+     "tax": 3,
+     "health": 2,
+     "education": 3,
+     "infrastructure": 3,
+     "social": 4,
+     "system": "up",
+     "policy": "buy",
+     "reasoning": 0,
+     "project": null,
+     "planner": []
+    },
+    "lakemoor": {
+     "tax": 3,
+     "health": 2,
+     "education": 4,
+     "infrastructure": 2,
+     "social": 3,
+     "system": "stay",
+     "policy": "buy",
+     "reasoning": 0,
+     "project": null,
+     "planner": []
+    },
+    "valcourt": {
+     "tax": 3,
+     "health": 4,
+     "education": 3,
+     "infrastructure": 3,
+     "social": 3,
+     "system": "down",
+     "policy": "buy",
+     "reasoning": 3,
+     "project": null,
+     "planner": []
+    },
+    "saltmarch": {
+     "tax": 3,
+     "health": 2,
+     "education": 2,
+     "infrastructure": 4,
+     "social": 3,
+     "system": "up",
+     "policy": "buy",
+     "reasoning": 0,
+     "project": null,
+     "planner": []
+    },
+    "northreach": {
+     "tax": 3,
+     "health": 3,
+     "education": 4,
+     "infrastructure": 3,
+     "social": 3,
+     "system": "stay",
+     "policy": "buy",
+     "reasoning": 1,
+     "project": null,
+     "planner": []
+    }
+   }
+  },
+  {
+   "event": "recession",
+   "choices": [
+    [
+     "westhaven",
+     "gen-power-plant",
+     "rebuild",
+     false
+    ],
+    [
+     "westhaven",
+     "recession",
+     "wait",
+     true
+    ],
+    [
+     "ridgeland",
+     "gen-teachers",
+     "raise",
+     false
+    ],
+    [
+     "ridgeland",
+     "recession",
+     "wait",
+     true
+    ],
+    [
+     "goldplain",
+     "gen-power-plant",
+     "patch",
+     false
+    ],
+    [
+     "goldplain",
+     "recession",
+     "tighten",
+     true
+    ],
+    [
+     "lakemoor",
+     "gen-minimum-wage",
+     "small",
+     false
+    ],
+    [
+     "lakemoor",
+     "recession",
+     "wait",
+     true
+    ],
+    [
+     "valcourt",
+     "gen-grocery-prices",
+     "cap",
+     false
+    ],
+    [
+     "valcourt",
+     "recession",
+     "wait",
+     true
+    ],
+    [
+     "saltmarch",
+     "gen-arena",
+     "pay",
+     false
+    ],
+    [
+     "saltmarch",
+     "recession",
+     "stimulus",
+     true
+    ],
+    [
+     "northreach",
+     "gen-seniors-care",
+     "build",
+     false
+    ],
+    [
+     "northreach",
+     "recession",
+     "wait",
+     true
+    ]
+   ],
+   "deals": [
+    [
+     "goldplain",
+     "lakemoor",
+     {
+      "food": 4
+     },
+     {
+      "money": 3.5
+     }
+    ],
+    [
+     "ridgeland",
+     "goldplain",
+     {
+      "energy": 3
+     },
+     {
+      "food": 3
+     }
+    ],
+    [
+     "northreach",
+     "westhaven",
+     {
+      "materials": 3
+     },
+     {
+      "food": 1,
+      "money": 1
+     }
+    ]
+   ],
+   "market": true,
+   "budgets": {
+    "westhaven": {
+     "tax": 3,
+     "health": 3,
+     "education": 3,
+     "infrastructure": 3,
+     "social": 3,
+     "system": "down",
+     "policy": "buy",
+     "reasoning": 0,
+     "project": null,
+     "planner": []
+    },
+    "ridgeland": {
+     "tax": 2,
+     "health": 4,
+     "education": 3,
+     "infrastructure": 3,
+     "social": 2,
+     "system": "stay",
+     "policy": "buy",
+     "reasoning": 2,
+     "project": null,
+     "planner": []
+    },
+    "goldplain": {
+     "tax": 2,
+     "health": 2,
+     "education": 3,
+     "infrastructure": 4,
+     "social": 3,
+     "system": "up",
+     "policy": "buy",
+     "reasoning": 1,
+     "project": null,
+     "planner": [
+      [
+       "food",
+       "energy",
+       2
+      ]
+     ]
+    },
+    "lakemoor": {
+     "tax": 3,
+     "health": 2,
+     "education": 4,
+     "infrastructure": 3,
+     "social": 2,
+     "system": "stay",
+     "policy": "buy",
+     "reasoning": 3,
+     "project": null,
+     "planner": []
+    },
+    "valcourt": {
+     "tax": 2,
+     "health": 3,
+     "education": 4,
+     "infrastructure": 4,
+     "social": 3,
+     "system": "down",
+     "policy": "buy",
+     "reasoning": 0,
+     "project": null,
+     "planner": []
+    },
+    "saltmarch": {
+     "tax": 2,
+     "health": 3,
+     "education": 2,
+     "infrastructure": 3,
+     "social": 3,
+     "system": "up",
+     "policy": "without",
+     "reasoning": 3,
+     "project": null,
+     "planner": []
+    },
+    "northreach": {
+     "tax": 2,
+     "health": 3,
+     "education": 4,
+     "infrastructure": 3,
+     "social": 4,
+     "system": "stay",
+     "policy": "buy",
+     "reasoning": 0,
+     "project": null,
+     "planner": []
+    }
+   }
+  },
+  {
+   "event": "drought",
+   "choices": [
+    [
+     "westhaven",
+     "westhaven-forest",
+     "limited",
+     false
+    ],
+    [
+     "westhaven",
+     "drought",
+     "aid-farmers",
+     true
+    ],
+    [
+     "ridgeland",
+     "ridgeland-windfall",
+     "spend",
+     false
+    ],
+    [
+     "ridgeland",
+     "drought",
+     "nothing",
+     true
+    ],
+    [
+     "goldplain",
+     "goldplain-towns",
+     "invest",
+     false
+    ],
+    [
+     "goldplain",
+     "drought",
+     "nothing",
+     true
+    ],
+    [
+     "lakemoor",
+     "lakemoor-traffic",
+     "wait",
+     false
+    ],
+    [
+     "lakemoor",
+     "drought",
+     "aid-farmers",
+     true
+    ],
+    [
+     "valcourt",
+     "valcourt-culture",
+     "compete",
+     false
+    ],
+    [
+     "valcourt",
+     "drought",
+     "aid-farmers",
+     true
+    ],
+    [
+     "saltmarch",
+     "saltmarch-shipyard",
+     "private",
+     false
+    ],
+    [
+     "saltmarch",
+     "drought",
+     "aid-farmers",
+     true
+    ],
+    [
+     "northreach",
+     "northreach-cost",
+     "greenhouse",
+     false
+    ],
+    [
+     "northreach",
+     "drought",
+     "aid-farmers",
+     true
+    ]
+   ],
+   "deals": [
+    [
+     "goldplain",
+     "lakemoor",
+     {
+      "food": 4
+     },
+     {
+      "money": 3.5
+     }
+    ],
+    [
+     "ridgeland",
+     "goldplain",
+     {
+      "energy": 3
+     },
+     {
+      "food": 3
+     }
+    ],
+    [
+     "northreach",
+     "westhaven",
+     {
+      "materials": 3
+     },
+     {
+      "food": 1,
+      "money": 1
+     }
+    ]
+   ],
+   "market": false,
+   "budgets": {
+    "westhaven": {
+     "tax": 4,
+     "health": 3,
+     "education": 3,
+     "infrastructure": 4,
+     "social": 4,
+     "system": "down",
+     "policy": "buy",
+     "reasoning": 2,
+     "project": null,
+     "planner": []
+    },
+    "ridgeland": {
+     "tax": 2,
+     "health": 3,
+     "education": 3,
+     "infrastructure": 2,
+     "social": 2,
+     "system": "stay",
+     "policy": "buy",
+     "reasoning": 0,
+     "project": null,
+     "planner": []
+    },
+    "goldplain": {
+     "tax": 2,
+     "health": 2,
+     "education": 3,
+     "infrastructure": 3,
+     "social": 4,
+     "system": "up",
+     "policy": "buy",
+     "reasoning": 1,
+     "project": null,
+     "planner": [
+      [
+       "food",
+       "energy",
+       2
+      ]
+     ]
+    },
+    "lakemoor": {
+     "tax": 4,
+     "health": 4,
+     "education": 3,
+     "infrastructure": 3,
+     "social": 3,
+     "system": "stay",
+     "policy": "buy",
+     "reasoning": 1,
+     "project": "tech-college",
+     "planner": []
+    },
+    "valcourt": {
+     "tax": 3,
+     "health": 4,
+     "education": 3,
+     "infrastructure": 2,
+     "social": 2,
+     "system": "down",
+     "policy": "buy",
+     "reasoning": 2,
+     "project": null,
+     "planner": []
+    },
+    "saltmarch": {
+     "tax": 3,
+     "health": 4,
+     "education": 4,
+     "infrastructure": 4,
+     "social": 2,
+     "system": "up",
+     "policy": "buy",
+     "reasoning": 2,
+     "project": null,
+     "planner": []
+    },
+    "northreach": {
+     "tax": 4,
+     "health": 3,
+     "education": 4,
+     "infrastructure": 3,
+     "social": 4,
+     "system": "stay",
+     "policy": "buy",
+     "reasoning": 3,
+     "project": "power-line",
+     "planner": []
+    }
+   }
+  },
+  {
+   "event": "energy-crash",
+   "choices": [
+    [
+     "westhaven",
+     "gen-old-bridge",
+     "toll",
+     false
+    ],
+    [
+     "westhaven",
+     "energy-crash",
+     "store",
+     true
+    ],
+    [
+     "ridgeland",
+     "gen-arena",
+     "owners",
+     false
+    ],
+    [
+     "ridgeland",
+     "energy-crash",
+     "store",
+     true
+    ],
+    [
+     "goldplain",
+     "gen-housing",
+     "charities",
+     false
+    ],
+    [
+     "goldplain",
+     "energy-crash",
+     "store",
+     true
+    ],
+    [
+     "lakemoor",
+     "gen-old-bridge",
+     "toll",
+     false
+    ],
+    [
+     "lakemoor",
+     "energy-crash",
+     "factories",
+     true
+    ],
+    [
+     "valcourt",
+     "gen-teachers",
+     "raise",
+     false
+    ],
+    [
+     "valcourt",
+     "energy-crash",
+     "factories",
+     true
+    ],
+    [
+     "saltmarch",
+     "gen-power-plant",
+     "rebuild",
+     false
+    ],
+    [
+     "saltmarch",
+     "energy-crash",
+     "keep",
+     true
+    ],
+    [
+     "northreach",
+     "gen-old-bridge",
+     "repair",
+     false
+    ],
+    [
+     "northreach",
+     "energy-crash",
+     "keep",
+     true
+    ]
+   ],
+   "deals": [
+    [
+     "goldplain",
+     "lakemoor",
+     {
+      "food": 4
+     },
+     {
+      "money": 3.5
+     }
+    ],
+    [
+     "ridgeland",
+     "goldplain",
+     {
+      "energy": 3
+     },
+     {
+      "food": 3
+     }
+    ],
+    [
+     "northreach",
+     "westhaven",
+     {
+      "materials": 3
+     },
+     {
+      "food": 1,
+      "money": 1
+     }
+    ]
+   ],
+   "market": true,
+   "budgets": {
+    "westhaven": {
+     "tax": 3,
+     "health": 4,
+     "education": 2,
+     "infrastructure": 3,
+     "social": 4,
+     "system": "down",
+     "policy": "buy",
+     "reasoning": 3,
+     "project": null,
+     "planner": []
+    },
+    "ridgeland": {
+     "tax": 4,
+     "health": 2,
+     "education": 2,
+     "infrastructure": 3,
+     "social": 3,
+     "system": "stay",
+     "policy": "buy",
+     "reasoning": 2,
+     "project": null,
+     "planner": []
+    },
+    "goldplain": {
+     "tax": 3,
+     "health": 3,
+     "education": 3,
+     "infrastructure": 4,
+     "social": 2,
+     "system": "up",
+     "policy": "buy",
+     "reasoning": 2,
+     "project": null,
+     "planner": [
+      [
+       "food",
+       "energy",
+       2
+      ]
+     ]
+    },
+    "lakemoor": {
+     "tax": 4,
+     "health": 4,
+     "education": 3,
+     "infrastructure": 4,
+     "social": 4,
+     "system": "stay",
+     "policy": "buy",
+     "reasoning": 2,
+     "project": null,
+     "planner": []
+    },
+    "valcourt": {
+     "tax": 2,
+     "health": 3,
+     "education": 4,
+     "infrastructure": 3,
+     "social": 2,
+     "system": "down",
+     "policy": "buy",
+     "reasoning": 2,
+     "project": null,
+     "planner": []
+    },
+    "saltmarch": {
+     "tax": 4,
+     "health": 2,
+     "education": 4,
+     "infrastructure": 3,
+     "social": 2,
+     "system": "up",
+     "policy": "buy",
+     "reasoning": 0,
+     "project": null,
+     "planner": []
+    },
+    "northreach": {
+     "tax": 4,
+     "health": 2,
+     "education": 3,
+     "infrastructure": 3,
+     "social": 3,
+     "system": "stay",
+     "policy": "buy",
+     "reasoning": 3,
+     "project": null,
+     "planner": []
+    }
+   }
+  },
+  {
+   "event": "rates-rise",
+   "choices": [
+    [
+     "westhaven",
+     "gen-tech-company",
+     "yes",
+     false
+    ],
+    [
+     "westhaven",
+     "rates-rise",
+     "keep",
+     true
+    ],
+    [
+     "ridgeland",
+     "gen-hospital-waits",
+     "wait",
+     false
+    ],
+    [
+     "ridgeland",
+     "rates-rise",
+     "pay-down",
+     true
+    ],
+    [
+     "goldplain",
+     "gen-minimum-wage",
+     "small",
+     false
+    ],
+    [
+     "goldplain",
+     "rates-rise",
+     "sell",
+     true
+    ],
+    [
+     "lakemoor",
+     "gen-housing",
+     "build",
+     false
+    ],
+    [
+     "lakemoor",
+     "rates-rise",
+     "keep",
+     true
+    ],
+    [
+     "valcourt",
+     "gen-arena",
+     "pay",
+     false
+    ],
+    [
+     "valcourt",
+     "rates-rise",
+     "sell",
+     true
+    ],
+    [
+     "saltmarch",
+     "gen-minimum-wage",
+     "small",
+     false
+    ],
+    [
+     "saltmarch",
+     "rates-rise",
+     "pay-down",
+     true
+    ],
+    [
+     "northreach",
+     "gen-minimum-wage",
+     "small",
+     false
+    ],
+    [
+     "northreach",
+     "rates-rise",
+     "sell",
+     true
+    ]
+   ],
+   "deals": [
+    [
+     "goldplain",
+     "lakemoor",
+     {
+      "food": 4
+     },
+     {
+      "money": 3.5
+     }
+    ],
+    [
+     "ridgeland",
+     "goldplain",
+     {
+      "energy": 3
+     },
+     {
+      "food": 3
+     }
+    ],
+    [
+     "northreach",
+     "westhaven",
+     {
+      "materials": 3
+     },
+     {
+      "food": 1,
+      "money": 1
+     }
+    ]
+   ],
+   "market": false,
+   "budgets": {
+    "westhaven": {
+     "tax": 4,
+     "health": 4,
+     "education": 3,
+     "infrastructure": 3,
+     "social": 4,
+     "system": "down",
+     "policy": "buy",
+     "reasoning": 1,
+     "project": null,
+     "planner": []
+    },
+    "ridgeland": {
+     "tax": 3,
+     "health": 3,
+     "education": 4,
+     "infrastructure": 2,
+     "social": 2,
+     "system": "stay",
+     "policy": "buy",
+     "reasoning": 3,
+     "project": null,
+     "planner": []
+    },
+    "goldplain": {
+     "tax": 4,
+     "health": 4,
+     "education": 3,
+     "infrastructure": 4,
+     "social": 4,
+     "system": "up",
+     "policy": "buy",
+     "reasoning": 3,
+     "project": null,
+     "planner": [
+      [
+       "food",
+       "energy",
+       2
+      ]
+     ]
+    },
+    "lakemoor": {
+     "tax": 3,
+     "health": 4,
+     "education": 3,
+     "infrastructure": 3,
+     "social": 2,
+     "system": "stay",
+     "policy": "buy",
+     "reasoning": 0,
+     "project": null,
+     "planner": []
+    },
+    "valcourt": {
+     "tax": 2,
+     "health": 3,
+     "education": 4,
+     "infrastructure": 3,
+     "social": 3,
+     "system": "down",
+     "policy": "buy",
+     "reasoning": 0,
+     "project": null,
+     "planner": []
+    },
+    "saltmarch": {
+     "tax": 3,
+     "health": 4,
+     "education": 4,
+     "infrastructure": 4,
+     "social": 4,
+     "system": "up",
+     "policy": "buy",
+     "reasoning": 0,
+     "project": null,
+     "planner": []
+    },
+    "northreach": {
+     "tax": 4,
+     "health": 2,
+     "education": 4,
+     "infrastructure": 3,
+     "social": 2,
+     "system": "stay",
+     "policy": "buy",
+     "reasoning": 0,
+     "project": null,
+     "planner": []
+    }
+   }
+  }
+ ]
+}

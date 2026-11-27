@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Borealis prototype status</title>
+<style>
+@font-face{font-family:"Crimson Text";src:url(app/fonts/CrimsonText-SemiBold.woff2) format("woff2");font-weight:600}
+@font-face{font-family:"Source Sans 3";src:url(app/fonts/SourceSans3-VF.woff2) format("woff2");font-weight:200 900}
+:root{--bg:#f6f0e2;--card:#fffaf0;--ink:#2a2420;--soft:#5b5149;--line:#d8cbb0;--accent:#1f5e57}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 "Source Sans 3",system-ui,sans-serif}
+main{max-width:980px;margin:0 auto;padding:clamp(20px,4vw,48px) max(4vw,16px)}
+h1,h2{font-family:"Crimson Text",Georgia,serif;font-weight:600;line-height:1.1;margin:0 0 10px}
+h1{font-size:clamp(32px,5vw,46px);letter-spacing:.02em}
+h2{font-size:26px;margin-top:34px}
+.lede{font-size:19px;color:var(--soft);max-width:65ch;margin:0}
+.map{width:100%;border:1px solid var(--line);border-radius:6px;margin:20px 0 14px;display:block}
+.btns{display:flex;flex-wrap:wrap;gap:10px}
+.btn{display:inline-flex;align-items:center;min-height:48px;padding:0 18px;border-radius:6px;border:1px solid var(--ink);color:var(--ink);text-decoration:none;font-weight:600;background:var(--card)}
+.btn.primary{background:var(--ink);color:#fff}
+.btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line)}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:14px;color:var(--soft);font-weight:600}
+ol,ul{padding-left:22px}li{margin:6px 0}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:14px 18px}
+.card h3{margin:0 0 6px;font-size:18px}
+.small{font-size:14px;color:var(--soft)}
+@media(max-width:700px){.two{grid-template-columns:minmax(0,1fr)}th:first-child,td:first-child{width:40%}}
+</style>
+</head>
+<body>
+<main>
+  <h1>Borealis</h1>
+  <p class="lede">This is where the economics-to-politics simulation stands. Your whiteboard plan is built as a working prototype. Try it, then tell me where it matches what you pictured and where it doesn't.</p>
+  <img class="map" src="app/map/borealis-map.svg" alt="Map of Borealis with seven provinces: Westhaven, Ridgeland, Goldplain, Lakemoor, Valcourt, Saltmarch and Northreach">
+  <div class="btns">
+    <a class="btn primary" href="app/demo.html">Try the demo: board and one phone</a>
+    <a class="btn" href="app/board.html">Open the teacher board</a>
+    <a class="btn" href="app/index.html">Join as a group</a>
+  </div>
+  <p class="small">The demo runs everything in one window. Press "Start a new game", then "Start Year 1", and watch the phone update.</p>
+
+  <h2>Your whiteboard, built</h2>
+  <table>
+    <thead><tr><th>On the whiteboard</th><th>In the prototype</th></tr></thead>
+    <tbody>
+      <tr><td>7 territories, groups of 4</td><td>7 provinces of a fictional country, Borealis. Each group has 4 rotating roles: Premier, Finance Minister, Trade Minister, Citizens' Advocate.</td></tr>
+      <tr><td>Approval rating</td><td>Each province has an approval score. It shows why it changed, based on 4 citizen groups: workers, families, businesses, seniors.</td></tr>
+      <tr><td>Energy, Food, Materials, Money</td><td>The same 4 resources. Every province is short on something, so shortages cost money or approval.</td></tr>
+      <tr><td>Income, Free trade, Local issue</td><td>Each fiscal year runs Headline, Income, Trade, Local issue, Budget, then Year-end results.</td></tr>
+      <tr><td>Each group plays the provincial government</td><td>Groups set taxes, spending on health, education, infrastructure and social programs, and their place from market to command economy.</td></tr>
+      <tr><td>4 federal parties</td><td>Cornerstone, Forward, Common Good and Evergreen. They are fictional but echo real Canadian values.</td></tr>
+      <tr><td>Students "vote" themselves into a party</td><td>Students join a party caucus. Their home province stays their riding for the election.</td></tr>
+      <tr><td>Bills and issues</td><td>A federal budget bill goes through Cabinet, the House, the Senate and Royal Assent. Year 7 shows its effects on every province.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>The plan: 16 periods</h2>
+  <table>
+    <tbody>
+      <tr><td>Period 1</td><td>Launch: scarcity, meet your province</td></tr>
+      <tr><td>Periods 2 to 8</td><td>Phase 1 Economic: 6 fiscal years, one new idea each year (economic systems, taxes, deficits, GDP and CPI), then a check</td></tr>
+      <tr><td>Period 9</td><td>Bridge crisis: a problem no province can solve alone. Why a federal government?</td></tr>
+      <tr><td>Periods 10 to 15</td><td>Phase 2 Political: parties, platforms, campaign, election, Parliament, budget bill, then a check</td></tr>
+      <tr><td>Period 16</td><td>Budget Defence: students defend a decision using what they learned</td></tr>
+    </tbody>
+  </table>
+  <p class="small">Built to the Grade 8 outcomes in the June 2026 draft Social Studies curriculum. It can be cut to 12 periods or stretched to 18.</p>
+
+  <h2>Questions for you</h2>
+  <ol>
+    <li>Does one fiscal year per period match how you pictured class time?</li>
+    <li>Is 6 fiscal years right, or would fewer, deeper years work better?</li>
+    <li>Four preset parties that students shape: is that your vision, or should students write more of their own?</li>
+    <li>A few cards touch live Alberta debates (a pipeline, a language and culture card). Keep them, swap them, or preview them first?</li>
+    <li>The curriculum names the real parties. Is a short mini-lesson in Period 10, outside the game, the right place for that?</li>
+    <li>16 periods or 18?</li>
+  </ol>
+
+  <h2>Where it stands</h2>
+  <div class="two">
+    <div class="card"><h3>Works now</h3><ul><li>The whole unit, start to finish, on one computer</li><li>Board-only mode if devices fail</li><li>Separate saved games for each class</li><li>Printable history log for the final task</li></ul></div>
+    <div class="card"><h3>Not yet</h3><ul><li>Student phones talking to the board across the room. This needs a live sync service and a privacy review.</li><li>Testing on a real touch board and iPads</li></ul></div>
+  </div>
+  <p class="small">Design documents: <a href="spec/curriculum.md">curriculum plan</a> and <a href="spec/game-systems.md">game systems</a>. No student names are collected or stored.</p>
+</main>
+</body>
+</html>

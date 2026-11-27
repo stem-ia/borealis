@@ -1,0 +1,81 @@
+Event order: {'1': None, '2': 'recession', '3': 'rates-rise', '4': 'conflict-abroad', '5': 'newcomers', '6': 'tech-boom'}
+
+Final approval after Year 6 (mean of 40 seeds)
+| Strategy | Westhaven | Ridgeland | Goldplain | Lakemoor | Valcourt | Saltmarch | Northreach | Avg | Spread |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| balanced | 41 | 58 | 54 | 40 | 41 | 50 | 45 | 47 | 18 |
+| flexible | 51 | 59 | 56 | 51 | 48 | 54 | 50 | 53 | 11 |
+| invest | 51 | 57 | 53 | 50 | 46 | 52 | 49 | 51 | 11 |
+| max_spend | 52 | 63 | 52 | 54 | 31 | 42 | 55 | 50 | 32 |
+| austerity | 39 | 41 | 40 | 38 | 39 | 39 | 38 | 39 | 3 |
+| market | 40 | 57 | 55 | 39 | 36 | 47 | 48 | 46 | 21 |
+| command | 34 | 56 | 51 | 35 | 35 | 45 | 43 | 43 | 22 |
+| random | 34 | 38 | 35 | 35 | 31 | 33 | 32 | 34 | 7 |
+| no_trade | 30 | 50 | 34 | 25 | 32 | 37 | 18 | 32 | 32 |
+
+Lowest approval seen in any year, any seed
+| Strategy | Westhaven | Ridgeland | Goldplain | Lakemoor | Valcourt | Saltmarch | Northreach |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| balanced | 26 | 52 | 27 | 28 | 30 | 29 | 22 |
+| flexible | 33 | 53 | 41 | 26 | 36 | 22 | 15 |
+| invest | 42 | 53 | 44 | 35 | 29 | 19 | 16 |
+| max_spend | 44 | 52 | 41 | 46 | 16 | 24 | 16 |
+| austerity | 33 | 39 | 38 | 34 | 31 | 28 | 32 |
+| market | 24 | 50 | 34 | 25 | 24 | 20 | 32 |
+| command | 22 | 51 | 35 | 21 | 23 | 25 | 13 |
+| random | 26 | 28 | 12 | 25 | 18 | 17 | 8 |
+| no_trade | 21 | 44 | 25 | 18 | 23 | 20 | 5 |
+
+Net debt as % of GDP after Year 6 (negative = savings)
+| Strategy | Westhaven | Ridgeland | Goldplain | Lakemoor | Valcourt | Saltmarch | Northreach | Avg |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| balanced | 10 | -59 | -2 | 13 | 31 | 14 | 3 | 2 |
+| flexible | 19 | -55 | 5 | 22 | 42 | 21 | 4 | 8 |
+| invest | 29 | -55 | 9 | 30 | 57 | 26 | 11 | 15 |
+| max_spend | 67 | 29 | 62 | 58 | 87 | 73 | 58 | 62 |
+| austerity | 9 | -105 | -34 | 23 | 30 | 10 | -11 | -11 |
+| market | 8 | -62 | -15 | 13 | 31 | 16 | -8 | -2 |
+| command | 12 | -61 | 5 | 14 | 33 | 17 | 3 | 3 |
+| random | 34 | -52 | 32 | 41 | 57 | 38 | 41 | 27 |
+| no_trade | 13 | -43 | 13 | 17 | 32 | 23 | 34 | 13 |
+
+Year 7 shadow year (same habits, no event): approval, and interest as % of revenue at end of Year 6
+| Strategy | Westhaven | Ridgeland | Goldplain | Lakemoor | Valcourt | Saltmarch | Northreach | Avg Y7 | Avg interest share |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| balanced | 39 | 59 | 55 | 39 | 39 | 50 | 45 | 47 | 3% |
+| flexible | 50 | 60 | 57 | 51 | 48 | 55 | 50 | 53 | 4% |
+| invest | 53 | 57 | 54 | 52 | 45 | 52 | 49 | 52 | 6% |
+| max_spend | 52 | 64 | 54 | 56 | 30 | 43 | 57 | 51 | 16% |
+| austerity | 37 | 40 | 39 | 36 | 36 | 37 | 37 | 37 | 3% |
+| market | 38 | 58 | 57 | 39 | 34 | 46 | 49 | 46 | 3% |
+| command | 29 | 57 | 51 | 33 | 31 | 44 | 42 | 41 | 3% |
+| random | 32 | 36 | 33 | 33 | 28 | 30 | 28 | 32 | 9% |
+| no_trade | 26 | 50 | 33 | 22 | 29 | 35 | 16 | 30 | 4% |
+
+GDP growth % over 6 years / final unemployment % / final CPI (national average)
+| Strategy | GDP growth | Unemployment | CPI | World imports $B (6 yrs, avg province) | Approval after Year 3 |
+| --- | --- | --- | --- | --- | --- |
+| balanced | 14 | 6.2 | 110 | 4 | 49 |
+| flexible | 16 | 5.5 | 110 | 3 | 52 |
+| invest | 17 | 4.5 | 112 | 3 | 52 |
+| max_spend | 23 | 2.9 | 116 | 6 | 52 |
+| austerity | 11 | 7.5 | 116 | 7 | 44 |
+| market | 15 | 7.5 | 108 | 5 | 48 |
+| command | 13 | 5.1 | 115 | 8 | 47 |
+| random | 16 | 5.6 | 117 | 27 | 43 |
+| no_trade | 10 | 8.0 | 115 | 48 | 42 |
+
+Checks
+- [PASS] No province doomed under sensible play: mean final approval >= 30 (34)
+- [PASS] Even careless play stays in the game: mean final approval >= 15 (18)
+- [PASS] No runaway: every mean final approval <= 80 (63)
+- [FAIL] Sensible play never collapses: lowest single-year approval >= 15 (13)
+- [PASS] Debt follows you: max spending enters Phase 2 with 3x the interest burden of flexible (16% vs 4% of revenue)
+- [PASS] Balanced spread across provinces <= 20 points (18)
+- [PASS] Max spending feels good early (Year 3 >= balanced) (52 vs 49)
+- [PASS] Max spending ends worse than flexible (50 vs 53)
+- [PASS] Flexible (crisis deficits allowed) beats strict balance (53 vs 47)
+- [PASS] Trading matters: no-trade ends 4 to 15 points lower (14.7)
+- [PASS] Market vs command within 6 points (no dominant system) (46 vs 43)
+- [PASS] Market grows GDP faster than command ()
+- [PASS] Command has lower unemployment than market ()

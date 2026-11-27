@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Borealis</title>
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body class="start">
+<main class="start-main">
+  <header class="cartouche">
+    <span class="kicker">The Federation of</span>
+    <h1>BOREALIS</h1>
+    <span class="sub">Seven provinces from sea to sea</span>
+  </header>
+  <div class="start-choices">
+    <a class="btn primary big" href="board.html">I am the teacher</a>
+    <button class="btn big" id="join-open">Join my group</button>
+  </div>
+  <form id="join" class="card join" hidden autocomplete="off">
+    <label class="field">Room code <input id="room" maxlength="4" inputmode="text" autocapitalize="characters" placeholder="ABCD" required></label>
+    <fieldset><legend>Your province</legend><div class="pchips" id="provs"></div></fieldset>
+    <fieldset><legend>Or, in Phase 2, your party caucus</legend><div class="pchips" id="parties"></div></fieldset>
+    <button class="btn primary big" type="submit">Join</button>
+    <p class="small">No names. Your group joins as its province or party.</p>
+  </form>
+</main>
+<script type="module" src="js/index.js"></script>
+</body>
+</html>
